@@ -167,26 +167,7 @@ window.onload = wrap_img;
 <h3 id="Seq2Seq-Pretraining">
 <a class="anchor" href="#Seq2Seq-Pretraining" aria-hidden="true"><span class="octicon octicon-link"></span></a>Seq2Seq Pretraining<a class="anchor-link" href="#Seq2Seq-Pretraining"> </a>
 </h3>
-<p>In October 2019, teams from Microsoft, Google and Facebook independently published three new transformer papers: UniLM, T5 and Bart. All three papers analyze found, in general that they achieve better downstream performance if they (a) replace Bert's bidirectional architecture with a seq2seq architecture and (b) Bert's fill-in-the blank cloze task with a more complicated mix of pretraining tasks. It's a fun game to try to match which of the following quotes from the abstract map to which paper:</p>
-<ol>
-<li>
-<blockquote>
-<p>While many modern approaches to transfer learning for NLP use a Transformer architecture consisting of only a single “stack” (e.g. for language modeling [GPT2]  or classification and span prediction [BERT]), we found that using a standard encoder-decoder structure achieved good results on both generative and classification tasks.</p>
-</blockquote>
-</li>
-<li>
-<blockquote>
-<p>The model is pre-trained using three types of language modeling tasks: unidirectional, bidirectional, and sequence-to-sequence prediction.</p>
-</blockquote>
-</li>
-<li>
-<blockquote>
-<p>We present a denoising autoencoder for pretraining sequence to sequence models, ... it uses a standard Transformer-based neural machine translation architecture.</p>
-</blockquote>
-</li>
-</ol>
-<p>Answers: [^1]
- [^1]: Answers: (T5, Oct 24) , (UniLM, Oct. 15) , (Bart, Oct. 29)</p>
+<p>In October 2019, teams from Microsoft, Google and Facebook independently published three new transformer papers: UniLM, T5 and Bart. All three papers analyze found that they achieve better downstream performance on generation tasks if they (a) replace Bert's bidirectional architecture with a seq2seq architecture and (b) Bert's fill-in-the blank cloze task with a more complicated mix of pretraining tasks.</p>
 
 </div>
 </div>
@@ -194,15 +175,7 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>If you got that right you are very lucky indeed!</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Now lets dig a bit deeper on this big Seq2Seq idea, then dive into some interesting parts of the code!</p>
+<p>Now lets dig a bit deeper on this big Seq2Seq pretraining idea, then dive into some interesting parts of the code!</p>
 
 </div>
 </div>
@@ -213,16 +186,21 @@ window.onload = wrap_img;
 <h3 id="Big-Idea:-Bidirectional-Encoder,-Left-To-Right-Decoder">
 <a class="anchor" href="#Big-Idea:-Bidirectional-Encoder,-Left-To-Right-Decoder" aria-hidden="true"><span class="octicon octicon-link"></span></a>Big Idea: Bidirectional Encoder, Left-To-Right Decoder<a class="anchor-link" href="#Big-Idea:-Bidirectional-Encoder,-Left-To-Right-Decoder"> </a>
 </h3>
-<p>Bert is pretrained to try to predict mask tokens, and uses the whole sequence to get enough info to make a good guess. This is good for tasks where the prediction at position <code>i</code> can depend on information from positions after <code>i</code>, but suboptimal for tasks where you are not, like text generation, where you generate the next word conditional on the words you have seen BEFORE.</p>
-<p>In the code, bert's "Fully Visible" <code>attention_mask</code> is boring:</p>
-
+<p>Bert is pretrained to try to predict masked tokens, and uses the whole sequence to get enough info to make a good guess. This is good for tasks where the prediction at position <code>i</code> is allowed to utilize information from positions after <code>i</code>, but less useful for tasks where you are not, like text generation, where you generate the next word conditional on the previously generated words.</p>
+<p>In code, the idea of "what information you can use when predicting the token at position <code>i</code>" is controlled by a parameter called <code>attention_mask</code><sup class="footnote-ref" id="fnref-2"><a href="#fn-2">1</a></sup>. 
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
+    <strong>Note: </strong>In this post, we show attention masks in grids where each row <code>y</code> represents an output token, and each column <code>x</code> represents an input token. If the square at <code>(y3, x4)</code> is black. It means that our prediction for <code>y3</code> is allowed to utilize information from <code>x4</code>. During pretraining, <code>x</code> would be the corrupted document, and <code>y</code> would be the original (that you are trying to reproduce).
 </div>
+<p>Bert's "Fully-visible" <code>attention_mask</code> is boring:
+<img src="/blog_v2/images/copied_from_nb/./fully_visible_attn_mask_v2.png" alt=""></p>
+<div class="footnotes">
+<hr>
+<ol>
+<li id="fn-2"><p>the same parameter that is used to make model predictions invariant to pad tokens.<a href="#fnref-2" class="footnote">↩</a></p></li>
+</ol>
 </div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><img src="/blog_v2/images/copied_from_nb/./fully_visible_attn_mask_v2.png" alt=""></p>
 
 </div>
 </div>
@@ -232,7 +210,7 @@ window.onload = wrap_img;
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>GPT2, meanwhile, is pretrained to predict the next word.
 This makes it good at generation tasks, where there aren't future tokens to consider, but suboptimal for other downstream tasks where the causal mask provides no benefit.</p>
-<p>Here is the attention mask for GPT2, white squares in y2, x3 show that the prediction for timestep 2 does not depend on the input at timestep 3.</p>
+<p>Here is the <code>attention_mask</code> for GPT2, white squares in y2, x3 show that the prediction for timestep 2 does not depend on the input at timestep 3.</p>
 
 </div>
 </div>
@@ -586,7 +564,7 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="text_cell_render border-box-sizing rendered_html">
 <p></p>
 <div class="flash">
-    <svg class="octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
+    <svg class="octicon octicon-info octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
     <strong>Note: </strong>The same correspondence exists between <code>BartForSequenceClassification</code>  and all the other <code>*ForSequenceClassification</code> in <code>transformers</code>.
 </div>
 
@@ -757,6 +735,33 @@ Anyways, here is a really slow (pseudocode) way to greedily generate summaries</
 <p>Note 
 Most of our other models do not make inputs for the user -- that's the tokenizer's job, but as the t5 authors write: &gt; "A major factor that differentiates the architectures is the mask used by different attention mechanisms in the model."</p>
 </blockquote>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>It's a fun game to try to match which of the following quotes from the abstract map to which paper:</p>
+<ol>
+<li>
+<blockquote>
+<p>While many modern approaches to transfer learning for NLP use a Transformer architecture consisting of only a single “stack” (e.g. for language modeling [GPT2]  or classification and span prediction [BERT]), we found that using a standard encoder-decoder structure achieved good results on both generative and classification tasks.</p>
+</blockquote>
+</li>
+<li>
+<blockquote>
+<p>The model is pre-trained using three types of language modeling tasks: unidirectional, bidirectional, and sequence-to-sequence prediction.</p>
+</blockquote>
+</li>
+<li>
+<blockquote>
+<p>We present a denoising autoencoder for pretraining sequence to sequence models, ... it uses a standard Transformer-based neural machine translation architecture.</p>
+</blockquote>
+</li>
+</ol>
+<p>Answers: [^1]
+ [^1]: Answers: (T5, Oct 24) , (UniLM, Oct. 15) , (Bart, Oct. 29)</p>
 
 </div>
 </div>
