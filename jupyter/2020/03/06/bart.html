@@ -191,10 +191,10 @@ window.onload = wrap_img;
 </p>
 <div class="flash">
     <svg class="octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
-    <strong>Note: </strong>In this post, we show attention masks in grids where each row <code>y</code> represents an output token, and each column <code>x</code> represents an input token. If the square at <code>(y3, x4)</code> is black. It means that our prediction for <code>y3</code> is allowed to utilize information from <code>x4</code>. During pretraining, <code>x</code> would be the corrupted document, and <code>y</code> would be the original (that you are trying to reproduce).
+    <strong>Note: </strong>In this post, we show attention masks in grids where each row <code>y</code> represents an output token, and each column <code>x</code> represents an input token. If the square at <code>(y3, x4)</code> is black. It means that our prediction for <code>y3</code> is allowed to utilize information from <code>x4</code>. During pretraining, <code>x</code> would be the corrupted document, and <code>y</code> would be the original.
 </div>
 <p>Bert's "Fully-visible" <code>attention_mask</code> is boring:
-<img src="/blog_v2/images/copied_from_nb/./fully_visible_attn_mask_v2.png" alt=""></p>
+<img src="/blog_v2/images/copied_from_nb/./bert_mask_better.png" alt=""></p>
 <div class="footnotes">
 <hr>
 <ol>
@@ -205,11 +205,46 @@ window.onload = wrap_img;
 </div>
 </div>
 </div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ls</span> <span class="n">bert_attn_mask</span><span class="o">.</span><span class="n">jpg</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>2020-03-06-bart.ipynb           gpt2_simple_mask.jpg
+README.md                       <span class="ansi-cyan-intense-fg ansi-bold">my_icons</span>/
+bert_attn_mask.jpg              t5_mask_diagram.png
+fully_visible_attn_mask_v2.png  tab1.csv
+gpt2_mask.jpeg
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>GPT2, meanwhile, is pretrained to predict the next word.
-This makes it good at generation tasks, where there aren't future tokens to consider, but suboptimal for other downstream tasks where the causal mask provides no benefit.</p>
+This makes it good for producing generations, where there aren't future tokens to consider, but less useful for other downstream tasks where the whole sentence is utilized.</p>
 <p>Here is the <code>attention_mask</code> for GPT2, white squares in y2, x3 show that the prediction for timestep 2 does not depend on the input at timestep 3.</p>
 
 </div>
