@@ -96,7 +96,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      15 min read
+      12 min read
     
 </span></p>
 
@@ -421,9 +421,13 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#collapse-hide</span>
 <span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">BartTokenizer</span><span class="p">,</span> <span class="n">BartForConditionalGeneration</span>
 <span class="n">torch_device</span> <span class="o">=</span> <span class="s1">'cuda'</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">'cpu'</span>
-<span class="n">LONG_ARTICLE</span> <span class="o">=</span> <span class="s1">' (CNN)The Palestinian Authority officially became the 123rd member of the International Criminal Court on Wednesday, a step that gives the court jurisdiction over alleged crimes in Palestinian territories. The formal accession was marked with a ceremony at The Hague, in the Netherlands, where the court is based. The Palestinians signed the ICC</span><span class="se">\'</span><span class="s1">s founding Rome Statute in January, when they also accepted its jurisdiction over alleged crimes committed "in the occupied Palestinian territory, including East Jerusalem, since June 13, 2014." Later that month, the ICC opened a preliminary examination into the situation in Palestinian territories, paving the way for possible war crimes investigations against Israelis. As members of the court, Palestinians may be subject to counter-charges as well. Israel and the United States, neither of which is an ICC member, opposed the Palestinians</span><span class="se">\'</span><span class="s1"> efforts to join the body. But Palestinian Foreign Minister Riad al-Malki, speaking at Wednesday</span><span class="se">\'</span><span class="s1">s ceremony, said it was a move toward greater justice. "As Palestine formally becomes a State Party to the Rome Statute today, the world is also a step closer to ending a long era of impunity and injustice," he said, according to an ICC news release. "Indeed, today brings us closer to our shared goals of justice and peace." Judge Kuniko Ozaki, a vice president of the ICC, said acceding to the treaty was just the first step for the Palestinians. "As the Rome Statute today enters into force for the State of Palestine, Palestine acquires all the rights as well as responsibilities that come with being a State Party to the Statute. These are substantive commitments, which cannot be taken lightly," she said. Rights group Human Rights Watch welcomed the development. "Governments seeking to penalize Palestine for joining the ICC should immediately end their pressure, and countries that support universal acceptance of the court</span><span class="se">\'</span><span class="s1">s treaty should speak out to welcome its membership," said Balkees Jarrah, international justice counsel for the group. "What</span><span class="se">\'</span><span class="s1">s objectionable is the attempts to undermine international justice, not Palestine</span><span class="se">\'</span><span class="s1">s decision to join a treaty to which over 100 countries around the world are members." In January, when the preliminary ICC examination was opened, Israeli Prime Minister Benjamin Netanyahu described it as an outrage, saying the court was overstepping its boundaries. The United States also said it "strongly" disagreed with the court</span><span class="se">\'</span><span class="s1">s decision. "As we have said repeatedly, we do not believe that Palestine is a state and therefore we do not believe that it is eligible to join the ICC," the State Department said in a statement. It urged the warring sides to resolve their differences through direct negotiations. "We will continue to oppose actions against Israel at the ICC as counterproductive to the cause of peace," it said. But the ICC begs to differ with the definition of a state for its purposes and refers to the territories as "Palestine." While a preliminary examination is not a formal investigation, it allows the court to review evidence and determine whether to investigate suspects on both sides. Prosecutor Fatou Bensouda said her office would "conduct its analysis in full independence and impartiality." The war between Israel and Hamas militants in Gaza last summer left more than 2,000 people dead. The inquiry will include alleged war crimes committed since June. The International Criminal Court was set up in 2002 to prosecute genocide, crimes against humanity and war crimes. CNN</span><span class="se">\'</span><span class="s1">s Vasco Cotovio, Kareem Khadder and Faith Karimi contributed to this report.'</span> 
-<span class="n">LONG_ARTICLE</span>
+<span class="k">def</span> <span class="nf">print_80_per_line</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">80</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">txt</span><span class="p">),</span> <span class="n">n</span><span class="p">):</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">txt</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">n</span><span class="p">])</span>
+    <span class="k">return</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -431,22 +435,75 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 </div>
 
     </details>
-<div class="output_wrapper">
-<div class="output">
+</div>
+    
 
-<div class="output_area">
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description" open="">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
 
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#collapse-show</span>
+<span class="n">LONG_ARTICLE</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">(CNN)The Palestinian Authority officially became the 123rd member of the Intern</span>
+<span class="s2">ational Criminal Court on Wednesday, a step that gives the court jurisdiction ov</span>
+<span class="s2">er alleged crimes in Palestinian territories. The formal accession was marked wi</span>
+<span class="s2">th a ceremony at The Hague, in the Netherlands, where the court is based. The Pa</span>
+<span class="s2">lestinians signed the ICC's founding Rome Statute in January, when they also acc</span>
+<span class="s2">epted its jurisdiction over alleged crimes committed "in the occupied Palestinia</span>
+<span class="s2">n territory, including East Jerusalem, since June 13, 2014." Later that month, t</span>
+<span class="s2">he ICC opened a preliminary examination into the situation in Palestinian territ</span>
+<span class="s2">ories, paving the way for possible war crimes investigations against Israelis. A</span>
+<span class="s2">s members of the court, Palestinians may be subject to counter-charges as well. </span>
+<span class="s2">Israel and the United States, neither of which is an ICC member, opposed the Pal</span>
+<span class="s2">estinians' efforts to join the body. But Palestinian Foreign Minister Riad al-Ma</span>
+<span class="s2">lki, speaking at Wednesday's ceremony, said it was a move toward greater justice</span>
+<span class="s2">. "As Palestine formally becomes a State Party to the Rome Statute today, the wo</span>
+<span class="s2">rld is also a step closer to ending a long era of impunity and injustice," he sa</span>
+<span class="s2">id, according to an ICC news release. "Indeed, today brings us closer to our sha</span>
+<span class="s2">red goals of justice and peace." Judge Kuniko Ozaki, a vice president of the ICC</span>
+<span class="s2">, said acceding to the treaty was just the first step for the Palestinians. "As </span>
+<span class="s2">the Rome Statute today enters into force for the State of Palestine, Palestine a</span>
+<span class="s2">cquires all the rights as well as responsibilities that come with being a State </span>
+<span class="s2">Party to the Statute. These are substantive commitments, which cannot be taken l</span>
+<span class="s2">ightly," she said. Rights group Human Rights Watch welcomed the development. "Go</span>
+<span class="s2">vernments seeking to penalize Palestine for joining the ICC should immediately e</span>
+<span class="s2">nd their pressure, and countries that support universal acceptance of the court'</span>
+<span class="s2">s treaty should speak out to welcome its membership," said Balkees Jarrah, inter</span>
+<span class="s2">national justice counsel for the group. "What's objectionable is the attempts to</span>
+<span class="s2"> undermine international justice, not Palestine's decision to join a treaty to w</span>
+<span class="s2">hich over 100 countries around the world are members." In January, when the prel</span>
+<span class="s2">iminary ICC examination was opened, Israeli Prime Minister Benjamin Netanyahu de</span>
+<span class="s2">scribed it as an outrage, saying the court was overstepping its boundaries. The </span>
+<span class="s2">United States also said it "strongly" disagreed with the court's decision. "As w</span>
+<span class="s2">e have said repeatedly, we do not believe that Palestine is a state and therefor</span>
+<span class="s2">e we do not believe that it is eligible to join the ICC," the State Department s</span>
+<span class="s2">aid in a statement. It urged the warring sides to resolve their differences thro</span>
+<span class="s2">ugh direct negotiations. "We will continue to oppose actions against Israel at t</span>
+<span class="s2">he ICC as counterproductive to the cause of peace," it said. But the ICC begs to</span>
+<span class="s2"> differ with the definition of a state for its purposes and refers to the territ</span>
+<span class="s2">ories as "Palestine." While a preliminary examination is not a formal investigat</span>
+<span class="s2">ion, it allows the court to review evidence and determine whether to investigate</span>
+<span class="s2"> suspects on both sides. Prosecutor Fatou Bensouda said her office would "conduc</span>
+<span class="s2">t its analysis in full independence and impartiality." The war between Israel an</span>
+<span class="s2">d Hamas militants in Gaza last summer left more than 2,000 people dead. The inqu</span>
+<span class="s2">iry will include alleged war crimes committed since June. The International Crim</span>
+<span class="s2">inal Court was set up in 2002 to prosecute genocide, crimes against humanity and</span>
+<span class="s2"> war crimes. CNN's Vasco Cotovio, Kareem Khadder and Faith Karimi contributed to</span>
+<span class="s2"> this report.</span>
+<span class="s2">"""</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span><span class="s1">''</span><span class="p">)</span>
+</pre></div>
 
-
-<div class="output_text output_subarea output_execute_result">
-<pre>' (CNN)The Palestinian Authority officially became the 123rd member of the International Criminal Court on Wednesday, a step that gives the court jurisdiction over alleged crimes in Palestinian territories. The formal accession was marked with a ceremony at The Hague, in the Netherlands, where the court is based. The Palestinians signed the ICC\'s founding Rome Statute in January, when they also accepted its jurisdiction over alleged crimes committed "in the occupied Palestinian territory, including East Jerusalem, since June 13, 2014." Later that month, the ICC opened a preliminary examination into the situation in Palestinian territories, paving the way for possible war crimes investigations against Israelis. As members of the court, Palestinians may be subject to counter-charges as well. Israel and the United States, neither of which is an ICC member, opposed the Palestinians\' efforts to join the body. But Palestinian Foreign Minister Riad al-Malki, speaking at Wednesday\'s ceremony, said it was a move toward greater justice. "As Palestine formally becomes a State Party to the Rome Statute today, the world is also a step closer to ending a long era of impunity and injustice," he said, according to an ICC news release. "Indeed, today brings us closer to our shared goals of justice and peace." Judge Kuniko Ozaki, a vice president of the ICC, said acceding to the treaty was just the first step for the Palestinians. "As the Rome Statute today enters into force for the State of Palestine, Palestine acquires all the rights as well as responsibilities that come with being a State Party to the Statute. These are substantive commitments, which cannot be taken lightly," she said. Rights group Human Rights Watch welcomed the development. "Governments seeking to penalize Palestine for joining the ICC should immediately end their pressure, and countries that support universal acceptance of the court\'s treaty should speak out to welcome its membership," said Balkees Jarrah, international justice counsel for the group. "What\'s objectionable is the attempts to undermine international justice, not Palestine\'s decision to join a treaty to which over 100 countries around the world are members." In January, when the preliminary ICC examination was opened, Israeli Prime Minister Benjamin Netanyahu described it as an outrage, saying the court was overstepping its boundaries. The United States also said it "strongly" disagreed with the court\'s decision. "As we have said repeatedly, we do not believe that Palestine is a state and therefore we do not believe that it is eligible to join the ICC," the State Department said in a statement. It urged the warring sides to resolve their differences through direct negotiations. "We will continue to oppose actions against Israel at the ICC as counterproductive to the cause of peace," it said. But the ICC begs to differ with the definition of a state for its purposes and refers to the territories as "Palestine." While a preliminary examination is not a formal investigation, it allows the court to review evidence and determine whether to investigate suspects on both sides. Prosecutor Fatou Bensouda said her office would "conduct its analysis in full independence and impartiality." The war between Israel and Hamas militants in Gaza last summer left more than 2,000 people dead. The inquiry will include alleged war crimes committed since June. The International Criminal Court was set up in 2002 to prosecute genocide, crimes against humanity and war crimes. CNN\'s Vasco Cotovio, Kareem Khadder and Faith Karimi contributed to this report.'</pre>
+    </div>
+</div>
 </div>
 
-</div>
-
-</div>
-</div>
-
+    </details>
 </div>
     
 
@@ -462,7 +519,8 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <span class="n">model</span> <span class="o">=</span> <span class="n">BartForConditionalGeneration</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s1">'bart-large-cnn'</span><span class="p">)</span>
 <span class="n">summary_ids</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">,</span> <span class="n">num_beams</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">length_penalty</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
                              <span class="n">max_length</span><span class="o">=</span><span class="mi">140</span><span class="p">,</span> <span class="n">min_len</span><span class="o">=</span><span class="mi">55</span><span class="p">)</span>
-<span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">summary_ids</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="p">)</span>
+<span class="n">summary_txt</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">summary_ids</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="p">)</span>
+<span class="n">summary_txt</span>
 </pre></div>
 
     </div>
@@ -491,7 +549,7 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><code>TODO(SS): output of above gets smushed into one line</code> it is really</p>
+<p><code>TODO(SS): output of above gets smushed into one line</code></p>
 <blockquote>
 <p>The Palestinian Authority becomes the 123rd member of the International Criminal Court. The move gives the court jurisdiction over alleged crimes in Palestinian territories. Israel and the United States opposed the Palestinians' efforts to join the body. But Palestinian Foreign Minister Riad al-Malki said it was a move toward greater justice.</p>
 </blockquote>
@@ -528,7 +586,7 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="text_cell_render border-box-sizing rendered_html">
 <p></p>
 <div class="flash">
-    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
+    <svg class="octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
     <strong>Note: </strong>The same correspondence exists between <code>BartForSequenceClassification</code>  and all the other <code>*ForSequenceClassification</code> in <code>transformers</code>.
 </div>
 
@@ -545,6 +603,7 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
     <span class="n">attention_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># ignored pad tokens in input_ids</span>
     <span class="n">decoder_input_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># make these if not supplied</span>
     <span class="n">decoder_padding_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># ignored pad tokens in decoder_input_ids</span>
+    <span class="n">decoder_causal_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># Ignore future tokens in decoder_input_ids</span>
 <span class="p">):</span>
 </pre></div>
 <p>When we're doing summarization finetuning, or seq2seq pretraining, we need to pass <code>decoder_input_ids</code>. (the masks will be made for you if you dont supply them).</p>
@@ -674,8 +733,10 @@ Anyways, here is a really slow (pseudocode) way to greedily generate summaries</
 <h2 id="Footnotes">
 <a class="anchor" href="#Footnotes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Footnotes<a class="anchor-link" href="#Footnotes"> </a>
 </h2>
-<p>[^2] "Text Summarization with Pretrained Encoders" <a href="https://arxiv.org/abs/1908.08345">https://arxiv.org/abs/1908.08345</a></p>
-<p>[^3] Differences between the UniLM Masking strategy and Bart</p>
+<div class="footnotes">
+<hr>
+<ol></ol>
+</div>
 
 </div>
 </div>
