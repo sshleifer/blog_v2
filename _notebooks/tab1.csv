@@ -1,0 +1,7 @@
+Paper, CNNDM Rouge 2 score 
+Bart, 21.28
+UniLM, 20.3
+BertSumABS, 19.39
+t5-base, 20.34
+t5 11B, 21.55
+TransformerAbs (2018), 17.76
