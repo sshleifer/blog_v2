@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Bart WalkThrough | TensorGoose</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="Bart WalkThrough" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A journey through the forward pass" />
+<meta property="og:description" content="A journey through the forward pass" />
+<link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html" />
+<meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html" />
+<meta property="og:site_name" content="TensorGoose" />
+<meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/chart-preview.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-03-06T00:00:00-06:00" />
+<script type="application/ld+json">
+{"datePublished":"2020-03-06T00:00:00-06:00","headline":"Bart WalkThrough","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"A journey through the forward pass","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html","dateModified":"2020-03-06T00:00:00-06:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/blog_v2/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/blog_v2/feed.xml" title="TensorGoose" /><link rel="shortcut icon" type="image/x-icon" href="/blog_v2/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Bart WalkThrough | TensorGoose</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="Bart WalkThrough" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A journey through the forward pass" />
+<meta property="og:description" content="A journey through the forward pass" />
+<link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html" />
+<meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html" />
+<meta property="og:site_name" content="TensorGoose" />
+<meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/chart-preview.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-03-06T00:00:00-06:00" />
+<script type="application/ld+json">
+{"datePublished":"2020-03-06T00:00:00-06:00","headline":"Bart WalkThrough","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"A journey through the forward pass","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html","dateModified":"2020-03-06T00:00:00-06:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
+<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/blog_v2/feed.xml" title="TensorGoose" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    // remove paragraph tags in rendered toc (happens from notebooks)
+    var toctags = document.querySelectorAll(".toc-entry")
+    toctags.forEach(e => (e.firstElementChild.innerText = e.firstElementChild.innerText.replace('¶', '')))
+    });
+</script>
+</head><body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/blog_v2/">TensorGoose</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/blog_v2/about/">About Me</a><a class="page-link" href="/blog_v2/search/">Search</a><a class="page-link" href="/blog_v2/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Bart WalkThrough</h1><p class="page-description">A journey through the forward pass</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-03-06T00:00:00-06:00" itemprop="datePublished">
+        Mar 6, 2020
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      15 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/blog_v2/categories/#jupyter">jupyter</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/sshleifer/blog_v2/tree/master/_notebooks/2020-03-06-bart.ipynb" role="button">
+<img class="notebook-badge-image" src="/blog_v2/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div><div class="px-2">
+    <a href="https://colab.research.google.com/github/sshleifer/blog_v2/blob/master/_notebooks/2020-03-06-bart.ipynb">
+        <img class="notebook-badge-image" src="/blog_v2/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h3"><a href="#Seq2Seq-Pretraining">Seq2Seq Pretraining </a></li>
+<li class="toc-entry toc-h3"><a href="#Big-Idea:-Bidirectional-Encoder,-Left-To-Right-Decoder">Big Idea: Bidirectional Encoder, Left-To-Right Decoder </a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#Awkward-Transition-to-Eng">Awkward Transition to Eng </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h3"><a href="#Demo-of--transformers.BartForConditionalGeneration">Demo of  transformers.BartForConditionalGeneration </a></li>
+<li class="toc-entry toc-h2"><a href="#Incremental-Decoding">Incremental Decoding </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Partially-caching-k-and-v-in-DecoderLayer">Partially caching k and v in DecoderLayer </a></li>
+<li class="toc-entry toc-h3"><a href="#Conclusion">Conclusion </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#Footnotes">Footnotes </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Cut">Cut </a></li>
+</ul>
+</li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2020-03-06-bart.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Seq2Seq-Pretraining">
+<a class="anchor" href="#Seq2Seq-Pretraining" aria-hidden="true"><span class="octicon octicon-link"></span></a>Seq2Seq Pretraining<a class="anchor-link" href="#Seq2Seq-Pretraining"> </a>
+</h3>
+<p>In October 2019, teams from Microsoft, Google and Facebook independently published three new transformer papers: UniLM, T5 and Bart. All three papers analyze found, in general that they achieve better downstream performance if they (a) replace Bert's bidirectional architecture with a seq2seq architecture and (b) Bert's fill-in-the blank cloze task with a more complicated mix of pretraining tasks. It's a fun game to try to match which of the following quotes from the abstract map to which paper:</p>
+<ol>
+<li>
+<blockquote>
+<p>While many modern approaches to transfer learning for NLP use a Transformer architecture consisting of only a single “stack” (e.g. for language modeling [GPT2]  or classification and span prediction [BERT]), we found that using a standard encoder-decoder structure achieved good results on both generative and classification tasks.</p>
+</blockquote>
+</li>
+<li>
+<blockquote>
+<p>The model is pre-trained using three types of language modeling tasks: unidirectional, bidirectional, and sequence-to-sequence prediction.</p>
+</blockquote>
+</li>
+<li>
+<blockquote>
+<p>We present a denoising autoencoder for pretraining sequence to sequence models, ... it uses a standard Transformer-based neural machine translation architecture.</p>
+</blockquote>
+</li>
+</ol>
+<p>Answers: [^1]
+ [^1]: Answers: (T5, Oct 24) , (UniLM, Oct. 15) , (Bart, Oct. 29)</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If you got that right you are very lucky indeed!</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now lets dig a bit deeper on this big Seq2Seq idea, then dive into some interesting parts of the code!</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Big-Idea:-Bidirectional-Encoder,-Left-To-Right-Decoder">
+<a class="anchor" href="#Big-Idea:-Bidirectional-Encoder,-Left-To-Right-Decoder" aria-hidden="true"><span class="octicon octicon-link"></span></a>Big Idea: Bidirectional Encoder, Left-To-Right Decoder<a class="anchor-link" href="#Big-Idea:-Bidirectional-Encoder,-Left-To-Right-Decoder"> </a>
+</h3>
+<p>Bert is pretrained to try to predict mask tokens, and uses the whole sequence to get enough info to make a good guess. This is good for tasks where the prediction at position <code>i</code> can depend on information from positions after <code>i</code>, but suboptimal for tasks where you are not, like text generation, where you generate the next word conditional on the words you have seen BEFORE.</p>
+<p>In the code, bert's "Fully Visible" <code>attention_mask</code> is boring:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="/blog_v2/images/copied_from_nb/./fully_visible_attn_mask_v2.png" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>GPT2, meanwhile, is pretrained to predict the next word.
+This makes it good at generation tasks, where there aren't future tokens to consider, but suboptimal for other downstream tasks where the causal mask provides no benefit.</p>
+<p>Here is the attention mask for GPT2, white squares in y2, x3 show that the prediction for timestep 2 does not depend on the input at timestep 3.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="/blog_v2/images/copied_from_nb/./gpt2_simple_mask.jpg" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Our new friends get the best of both worlds:</p>
+<p>The encoder is bidirectional  - each token's attention can attend to every other token in the input sequence, while the decoder, which will ultimately have to perform generation, is causal like GPT2.</p>
+<p>We can think about this attention pattern as smushing together our previous two attention masks, or "Causal Mask  with a fully visible prefix" in fancier terms.<sup class="footnote-ref" id="fnref-4"><a href="#fn-4">1</a></sup></p>
+<div class="footnotes">
+<hr>
+<ol>
+<li id="fn-4"><p>The indices dont line up perfectly for the smush to work, but tokens 1 and 2 are the fully visible prefix (or the input to the encoder) and tokens 3,4,5 are the causally masked suffix (or inputs to the decoder). In summarization terms, you could imagine tokens 1 and 2 as the article, and we generate tokens 3-5 auto-regressively.<a href="#fnref-4" class="footnote">↩</a></p></li>
+</ol>
+</div>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="/blog_v2/images/copied_from_nb/./t5_mask_diagram.png" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This attention pattern is very well suited to summarization and other conditional generation tasks.  You are allowed to attend to the whole document, but as you write your summary, one word at a time, you need only consider what you've already written. The numbers confirm this: all the new fancy guys do a lot better than the old less-fancy guys.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#collapse-hide </span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'tab1.csv'</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>CNNDM Rouge 2 score</th>
+    </tr>
+    <tr>
+      <th>Paper</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Bart</th>
+      <td>21.28</td>
+    </tr>
+    <tr>
+      <th>UniLM</th>
+      <td>20.30</td>
+    </tr>
+    <tr>
+      <th>BertSumABS</th>
+      <td>19.39</td>
+    </tr>
+    <tr>
+      <th>t5-base</th>
+      <td>20.34</td>
+    </tr>
+    <tr>
+      <th>t5 11B</th>
+      <td>21.55</td>
+    </tr>
+    <tr>
+      <th>TransformerAbs (2018)</th>
+      <td>17.76</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<!-- I start with this not to say that the researchers are lame, but that they were all discovering a very cool idea at the same time. In the following table, you can see that, at least for summarization, it is important to pretrain with a bidirectional encoder and causal decoder: (The UniLM `prefix_lm` is equivalent [^3]) -->
+
+<p><code>BertSumABS</code> [^2] , exploits the Seq2Seq architecture but doesn't pretrain the decoder.
+Also note that t5-11b is 22x bigger than Bart), and pretraining objectives.</p>
+<p>Bart tries out crazy pretraining tasks that you can only do with a seq2seq architecture. Since "Inputs to the encoder need not be aligned with decoder outputs, allowing arbitary noise transformations." They invent a pretraining task called Text Infilling, where you
+replace a <strong>span</strong> of text with a single mask token. This span can be of any length, so the model also must learn how many tokens to generate.</p>
+<p>There is also another trick in Bart: each decoder layer performs cross-attention over the final hidden state of the encoder output. This presumably nudges Bart towards generating summaries that are closely connected to the original (encoded) text.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Awkward-Transition-to-Eng">
+<a class="anchor" href="#Awkward-Transition-to-Eng" aria-hidden="true"><span class="octicon octicon-link"></span></a>Awkward Transition to Eng<a class="anchor-link" href="#Awkward-Transition-to-Eng"> </a>
+</h4>
+<p>Shortly after these papers were released our <code>transformers</code> users started asking for us to make them available in the repo, especially Bart. And now, a few months later, it's demo time!</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Demo-of--transformers.BartForConditionalGeneration">
+<a class="anchor" href="#Demo-of--transformers.BartForConditionalGeneration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Demo of  <code>transformers.BartForConditionalGeneration</code><a class="anchor-link" href="#Demo-of--transformers.BartForConditionalGeneration"> </a>
+</h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>imports</strong></p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#collapse-hide</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="n">torch_device</span> <span class="o">=</span> <span class="s1">'cuda'</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">'cpu'</span>
+<span class="n">LONG_ARTICLE</span> <span class="o">=</span> <span class="s1">' (CNN)The Palestinian Authority officially became the 123rd member of the International Criminal Court on Wednesday, a step that gives the court jurisdiction over alleged crimes in Palestinian territories. The formal accession was marked with a ceremony at The Hague, in the Netherlands, where the court is based. The Palestinians signed the ICC</span><span class="se">\'</span><span class="s1">s founding Rome Statute in January, when they also accepted its jurisdiction over alleged crimes committed "in the occupied Palestinian territory, including East Jerusalem, since June 13, 2014." Later that month, the ICC opened a preliminary examination into the situation in Palestinian territories, paving the way for possible war crimes investigations against Israelis. As members of the court, Palestinians may be subject to counter-charges as well. Israel and the United States, neither of which is an ICC member, opposed the Palestinians</span><span class="se">\'</span><span class="s1"> efforts to join the body. But Palestinian Foreign Minister Riad al-Malki, speaking at Wednesday</span><span class="se">\'</span><span class="s1">s ceremony, said it was a move toward greater justice. "As Palestine formally becomes a State Party to the Rome Statute today, the world is also a step closer to ending a long era of impunity and injustice," he said, according to an ICC news release. "Indeed, today brings us closer to our shared goals of justice and peace." Judge Kuniko Ozaki, a vice president of the ICC, said acceding to the treaty was just the first step for the Palestinians. "As the Rome Statute today enters into force for the State of Palestine, Palestine acquires all the rights as well as responsibilities that come with being a State Party to the Statute. These are substantive commitments, which cannot be taken lightly," she said. Rights group Human Rights Watch welcomed the development. "Governments seeking to penalize Palestine for joining the ICC should immediately end their pressure, and countries that support universal acceptance of the court</span><span class="se">\'</span><span class="s1">s treaty should speak out to welcome its membership," said Balkees Jarrah, international justice counsel for the group. "What</span><span class="se">\'</span><span class="s1">s objectionable is the attempts to undermine international justice, not Palestine</span><span class="se">\'</span><span class="s1">s decision to join a treaty to which over 100 countries around the world are members." In January, when the preliminary ICC examination was opened, Israeli Prime Minister Benjamin Netanyahu described it as an outrage, saying the court was overstepping its boundaries. The United States also said it "strongly" disagreed with the court</span><span class="se">\'</span><span class="s1">s decision. "As we have said repeatedly, we do not believe that Palestine is a state and therefore we do not believe that it is eligible to join the ICC," the State Department said in a statement. It urged the warring sides to resolve their differences through direct negotiations. "We will continue to oppose actions against Israel at the ICC as counterproductive to the cause of peace," it said. But the ICC begs to differ with the definition of a state for its purposes and refers to the territories as "Palestine." While a preliminary examination is not a formal investigation, it allows the court to review evidence and determine whether to investigate suspects on both sides. Prosecutor Fatou Bensouda said her office would "conduct its analysis in full independence and impartiality." The war between Israel and Hamas militants in Gaza last summer left more than 2,000 people dead. The inquiry will include alleged war crimes committed since June. The International Criminal Court was set up in 2002 to prosecute genocide, crimes against humanity and war crimes. CNN</span><span class="se">\'</span><span class="s1">s Vasco Cotovio, Kareem Khadder and Faith Karimi contributed to this report.'</span> 
+<span class="n">LONG_ARTICLE</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>' (CNN)The Palestinian Authority officially became the 123rd member of the International Criminal Court on Wednesday, a step that gives the court jurisdiction over alleged crimes in Palestinian territories. The formal accession was marked with a ceremony at The Hague, in the Netherlands, where the court is based. The Palestinians signed the ICC\'s founding Rome Statute in January, when they also accepted its jurisdiction over alleged crimes committed "in the occupied Palestinian territory, including East Jerusalem, since June 13, 2014." Later that month, the ICC opened a preliminary examination into the situation in Palestinian territories, paving the way for possible war crimes investigations against Israelis. As members of the court, Palestinians may be subject to counter-charges as well. Israel and the United States, neither of which is an ICC member, opposed the Palestinians\' efforts to join the body. But Palestinian Foreign Minister Riad al-Malki, speaking at Wednesday\'s ceremony, said it was a move toward greater justice. "As Palestine formally becomes a State Party to the Rome Statute today, the world is also a step closer to ending a long era of impunity and injustice," he said, according to an ICC news release. "Indeed, today brings us closer to our shared goals of justice and peace." Judge Kuniko Ozaki, a vice president of the ICC, said acceding to the treaty was just the first step for the Palestinians. "As the Rome Statute today enters into force for the State of Palestine, Palestine acquires all the rights as well as responsibilities that come with being a State Party to the Statute. These are substantive commitments, which cannot be taken lightly," she said. Rights group Human Rights Watch welcomed the development. "Governments seeking to penalize Palestine for joining the ICC should immediately end their pressure, and countries that support universal acceptance of the court\'s treaty should speak out to welcome its membership," said Balkees Jarrah, international justice counsel for the group. "What\'s objectionable is the attempts to undermine international justice, not Palestine\'s decision to join a treaty to which over 100 countries around the world are members." In January, when the preliminary ICC examination was opened, Israeli Prime Minister Benjamin Netanyahu described it as an outrage, saying the court was overstepping its boundaries. The United States also said it "strongly" disagreed with the court\'s decision. "As we have said repeatedly, we do not believe that Palestine is a state and therefore we do not believe that it is eligible to join the ICC," the State Department said in a statement. It urged the warring sides to resolve their differences through direct negotiations. "We will continue to oppose actions against Israel at the ICC as counterproductive to the cause of peace," it said. But the ICC begs to differ with the definition of a state for its purposes and refers to the territories as "Palestine." While a preliminary examination is not a formal investigation, it allows the court to review evidence and determine whether to investigate suspects on both sides. Prosecutor Fatou Bensouda said her office would "conduct its analysis in full independence and impartiality." The war between Israel and Hamas militants in Gaza last summer left more than 2,000 people dead. The inquiry will include alleged war crimes committed since June. The International Criminal Court was set up in 2002 to prosecute genocide, crimes against humanity and war crimes. CNN\'s Vasco Cotovio, Kareem Khadder and Faith Karimi contributed to this report.'</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">BartTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s1">'bart-large-cnn'</span><span class="p">)</span>
+<span class="n">article_input_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">batch_encode_plus</span><span class="p">([</span><span class="n">LONG_ARTICLE</span><span class="p">],</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s1">'pt'</span><span class="p">)[</span><span class="s1">'input_ids'</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch_device</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BartForConditionalGeneration</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s1">'bart-large-cnn'</span><span class="p">)</span>
+<span class="n">summary_ids</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">,</span> <span class="n">num_beams</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">length_penalty</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+                             <span class="n">max_length</span><span class="o">=</span><span class="mi">140</span><span class="p">,</span> <span class="n">min_len</span><span class="o">=</span><span class="mi">55</span><span class="p">)</span>
+<span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">summary_ids</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>"&lt;s&gt;The Palestinian Authority becomes the 123rd member of the International Criminal Court. The move gives the court jurisdiction over alleged crimes in Palestinian territories. Israel and the United States opposed the Palestinians' efforts to join the body. But Palestinian Foreign Minister Riad al-Malki said it was a move toward greater justice."</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><code>TODO(SS): output of above gets smushed into one line</code> it is really</p>
+<blockquote>
+<p>The Palestinian Authority becomes the 123rd member of the International Criminal Court. The move gives the court jurisdiction over alleged crimes in Palestinian territories. Israel and the United States opposed the Palestinians' efforts to join the body. But Palestinian Foreign Minister Riad al-Malki said it was a move toward greater justice.</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>TODO</strong>: get conditional generation working on GPT2 for this Doc. The following code just generates <code>eos</code>.</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">GPT2LMHeadModel</span><span class="p">,</span> <span class="n">GPT2Tokenizer</span>
+<span class="n">gpt2_tok</span> <span class="o">=</span> <span class="n">GPT2Tokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s1">'gpt2'</span><span class="p">)</span>
+<span class="n">gpt2_model</span> <span class="o">=</span> <span class="n">GPT2LMHeadModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s1">'gpt2'</span><span class="p">)</span>
+
+<span class="n">article_input_ids</span> <span class="o">=</span> <span class="n">gpt2_tok</span><span class="o">.</span><span class="n">batch_encode_plus</span><span class="p">([</span><span class="n">LONG_ARTICLE</span><span class="p">],</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s1">'pt'</span><span class="p">,</span> <span class="n">pad_to_max_length</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s1">'input_ids'</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch_device</span><span class="p">)</span>
+<span class="n">summary_ids</span> <span class="o">=</span> <span class="n">gpt2_model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="n">article_input_ids</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">155</span><span class="p">,</span> <span class="n">do_sample</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">gpt2_tok</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">summary_ids</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>One thing to notice in these two snippets: even though <code>BartForConditionalGeneration</code> is a seq2seq model, and <code>GPT2LMHeadModel</code> is not, they can invoked in similar ways for generation.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p></p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
+    <strong>Note: </strong>The same correspondence exists between <code>BartForSequenceClassification</code>  and all the other <code>*ForSequenceClassification</code> in <code>transformers</code>.
+</div>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Even though you can just pass <code>input_ids</code>, like the other models, <code>BartModel</code> (and all it's children)'s full signature is a little more complex:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">input_ids</span><span class="p">,</span>
+    <span class="n">attention_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># ignored pad tokens in input_ids</span>
+    <span class="n">decoder_input_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># make these if not supplied</span>
+    <span class="n">decoder_padding_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># ignored pad tokens in decoder_input_ids</span>
+<span class="p">):</span>
+</pre></div>
+<p>When we're doing summarization finetuning, or seq2seq pretraining, we need to pass <code>decoder_input_ids</code>. (the masks will be made for you if you dont supply them).</p>
+<p>When we're not, like in a classification context, you can safely ignore all the decoder kwargs and <code>BartModel</code> will make them for you by taking the input_ids (movie review) and shifting them to the right. Random, I know.</p>
+<p>The authors' <a href="https://github.com/pytorch/fairseq/issues/1389">motivation</a> for the shift-right trick was to facilitate teacher forcing during pre-training, and now that the model has been trained on 64 TPUs for 12 weeks to process this input format, we continue the pattern during inference, but hide it inside the forward method.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Incremental-Decoding">
+<a class="anchor" href="#Incremental-Decoding" aria-hidden="true"><span class="octicon octicon-link"></span></a>Incremental Decoding<a class="anchor-link" href="#Incremental-Decoding"> </a>
+</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>When I first read the fairseq code, there was a function called <code>make_generation_fast</code> which didnt do much besides catch my eye. What an exciting name! 
+Anyways, here is a really slow (pseudocode) way to greedily generate summaries</p>
+<div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+     <span class="n">encoder_hidden_state</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">)</span>
+     <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">encoder_hidden_state</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">)</span>
+     <span class="n">next_word</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+     <span class="n">output_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_word</span><span class="p">)</span>
+     <span class="k">if</span> <span class="n">next_word</span> <span class="o">==</span> <span class="n">eos</span><span class="p">:</span> <span class="k">break</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can just cache the first step and save half the compute</p>
+<div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">encoder_hidden_state</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">)</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+     <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">encoder_hidden_state</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">)</span>
+     <span class="n">next_word</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+
+     <span class="n">output_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_word</span><span class="p">)</span>
+     <span class="k">if</span> <span class="n">next_word</span> <span class="o">==</span> <span class="n">eos</span><span class="p">:</span> <span class="k">break</span>
+</pre></div>
+<p>Easy peasy, sorry for wasting your time. Here comes the fun one</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Partially-caching-k-and-v-in-DecoderLayer">
+<a class="anchor" href="#Partially-caching-k-and-v-in-DecoderLayer" aria-hidden="true"><span class="octicon octicon-link"></span></a>Partially caching k and v in <code>DecoderLayer</code><a class="anchor-link" href="#Partially-caching-k-and-v-in-DecoderLayer"> </a>
+</h3>
+<p>Here is some pseudocode for attention without all the reshapes and heads and masks and scaling.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SimplifiedAttention</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Wq</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Wk</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Wv</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dense</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wq</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wk</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> 
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wv</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">matmul_qk</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">attention_weights</span> <span class="o">=</span> <span class="n">matmul_qk</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">attention_weights</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+</pre></div>
+<p>Now lets glimpse at the callers inside bart's <code>DecoderLayer</code>:
+(LayerNorms and dropouts deleted for simplicity). Here's some more pseudocode</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SimplifiedDecoderLayer</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">self_attn</span> <span class="o">=</span> <span class="n">SimplifiedAttention</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder_attn</span> <span class="o">=</span> <span class="n">SimplifiedAttention</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">last_encoder_hidden_state</span><span class="p">,</span> <span class="o">*</span><span class="n">masks_etc</span><span class="p">):</span>
+         <span class="c1"># x shape `(batch_size, tokens_generated_so_far, embed_dim)`</span>
+         <span class="c1"># x comes from decoder</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_attn</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">x</span><span class="p">)</span> <span class="c1"># pay attention to somebody else for a change!</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_attn</span><span class="p">(</span>
+            <span class="n">query</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="n">last_encoder_hidden_state</span><span class="p">,</span>  <span class="c1"># could be None</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">last_encoder_hidden_state</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span>
+</pre></div>
+<p>What did we learn?</p>
+<ul>
+<li>In <code>encoder_attention</code>, we can cache everything that doesn't depend on q, namely these outputs
+<pre><code>      k = self.Wk(k) 
+      v = self.Wv(v)</code></pre>
+</li>
+</ul>
+<p>The more exciting optimization is that in <code>self_attn</code>, we can cache the part of k,v that depends on 
+<code>x[:, :1]</code> the tokens we've already generated. Then each time through the generation loop, we only pass in <code>x[:, :-1]</code> and apply concatenation:</p>
+<div class="highlight"><pre><span></span><span class="n">k</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">past_key</span><span class="p">,</span> <span class="n">new_k</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="s1">'seq_len'</span><span class="p">)</span> <span class="c1"># the seq_len dimension, </span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">past_value</span><span class="p">,</span> <span class="n">new_v</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="s1">'seq_len'</span><span class="p">)</span>
+</pre></div>
+<p><code>TODO(SS): Why cant we cache part of q?</code></p>
+<p>Of the 8 <code>F.linear</code> ops performed by each DecoderLayer was doing, we've managed to completely cache 2 of them, and almost completely cache 2 more. Overall, we chop off about 40% of the runtime. <code>TODO(SS): verify</code>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Conclusion">
+<a class="anchor" href="#Conclusion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusion<a class="anchor-link" href="#Conclusion"> </a>
+</h3>
+<p>Our first release of <code>BartModel</code> prioritized moving quickly and keeping the code simple. As a result, our implementation is about 30\% slower and uses more memory than the authors'. Stay tuned for episode 2 of this series, where we try to close the gap.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Footnotes">
+<a class="anchor" href="#Footnotes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Footnotes<a class="anchor-link" href="#Footnotes"> </a>
+</h2>
+<p>[^2] "Text Summarization with Pretrained Encoders" <a href="https://arxiv.org/abs/1908.08345">https://arxiv.org/abs/1908.08345</a></p>
+<p>[^3] Differences between the UniLM Masking strategy and Bart</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Cut">
+<a class="anchor" href="#Cut" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cut<a class="anchor-link" href="#Cut"> </a>
+</h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote>
+<p>Note 
+Most of our other models do not make inputs for the user -- that's the tokenizer's job, but as the t5 authors write: &gt; "A major factor that differentiates the architectures is the mask used by different attention mechanisms in the model."</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="sshleifer/blog_v2"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/blog_v2/jupyter/2020/03/06/bart.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/blog_v2/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/blog_v2/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/blog_v2/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>The rants and ravings of Sam Shleifer</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/sshleifer" title="sshleifer"><svg class="svg-icon grey"><use xlink:href="/blog_v2/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/sam_shleifer" title="sam_shleifer"><svg class="svg-icon grey"><use xlink:href="/blog_v2/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
