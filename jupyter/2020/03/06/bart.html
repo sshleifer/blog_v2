@@ -96,7 +96,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      12 min read
+      15 min read
     
 </span></p>
 
@@ -128,7 +128,9 @@ window.onload = wrap_img;
   <div class="post-content e-content" itemprop="articleBody">
     <ul class="section-nav">
 <li class="toc-entry toc-h3"><a href="#Seq2Seq-Pretraining">Seq2Seq Pretraining </a></li>
-<li class="toc-entry toc-h3"><a href="#Big-Idea:-Bidirectional-Encoder,-Left-To-Right-Decoder">Big Idea: Bidirectional Encoder, Left-To-Right Decoder </a>
+<li class="toc-entry toc-h3"><a href="#Background:-Bert-vs.-GPT2">Background: Bert vs. GPT2 </a></li>
+<li class="toc-entry toc-h3"><a href="#Encoder-Decoder">Encoder-Decoder </a></li>
+<li class="toc-entry toc-h3"><a href="#Summarization">Summarization </a>
 <ul>
 <li class="toc-entry toc-h4"><a href="#Awkward-Transition-to-Eng">Awkward Transition to Eng </a></li>
 </ul>
@@ -175,7 +177,7 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Now lets dig a bit deeper on this big Seq2Seq pretraining idea, then dive into some interesting parts of the code!</p>
+<p>Now lets dig deeper into the big Seq2Seq pretraining idea, then dive into some interesting parts of the <code>BartForConditionalGeneration</code> code.</p>
 
 </div>
 </div>
@@ -183,18 +185,20 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Big-Idea:-Bidirectional-Encoder,-Left-To-Right-Decoder">
-<a class="anchor" href="#Big-Idea:-Bidirectional-Encoder,-Left-To-Right-Decoder" aria-hidden="true"><span class="octicon octicon-link"></span></a>Big Idea: Bidirectional Encoder, Left-To-Right Decoder<a class="anchor-link" href="#Big-Idea:-Bidirectional-Encoder,-Left-To-Right-Decoder"> </a>
+<h3 id="Background:-Bert-vs.-GPT2">
+<a class="anchor" href="#Background:-Bert-vs.-GPT2" aria-hidden="true"><span class="octicon octicon-link"></span></a>Background: Bert vs. GPT2<a class="anchor-link" href="#Background:-Bert-vs.-GPT2"> </a>
 </h3>
+<p>As the Bart authors' write,</p>
+<blockquote>
+<p>(Bart) can be seen as generalizing Bert (due to the bidirectional encoder) and GPT (with the left to right decoder).</p>
+</blockquote>
 <p>Bert is pretrained to try to predict masked tokens, and uses the whole sequence to get enough info to make a good guess. This is good for tasks where the prediction at position <code>i</code> is allowed to utilize information from positions after <code>i</code>, but less useful for tasks where you are not, like text generation, where you generate the next word conditional on the previously generated words.</p>
-<p>In code, the idea of "what information you can use when predicting the token at position <code>i</code>" is controlled by a parameter called <code>attention_mask</code><sup class="footnote-ref" id="fnref-2"><a href="#fn-2">1</a></sup>. 
-</p>
-<div class="flash">
-    <svg class="octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
-    <strong>Note: </strong>In this post, we show attention masks in grids where each row <code>y</code> represents an output token, and each column <code>x</code> represents an input token. If the square at <code>(y3, x4)</code> is black. It means that our prediction for <code>y3</code> is allowed to utilize information from <code>x4</code>. During pretraining, <code>x</code> would be the corrupted document, and <code>y</code> would be the original.
-</div>
+<p>In code, the idea of "what information you can use when predicting the token at position <code>i</code>" is controlled by a parameter called <code>attention_mask</code><sup class="footnote-ref" id="fnref-2"><a href="#fn-2">1</a></sup>.</p>
+<blockquote>
+<p>Note: In this post, we show attention masks in grids where each row <code>y</code> represents an output token, and each column <code>x</code> represents an input token. If the square at <code>(y3, x4)</code> is black. It means that our prediction for <code>y3</code> is allowed to utilize information from <code>x4</code>. During pretraining, <code>x</code> would be the corrupted document, and <code>y</code> would be the original.</p>
+</blockquote>
 <p>Bert's "Fully-visible" <code>attention_mask</code> is boring:
-<img src="/blog_v2/images/copied_from_nb/./bert_mask_better.png" alt=""></p>
+<img src="/blog_v2/images/copied_from_nb/./bert_mac_small.jpg" alt=""></p>
 <div class="footnotes">
 <hr>
 <ol>
@@ -205,47 +209,12 @@ window.onload = wrap_img;
 </div>
 </div>
 </div>
-    
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ls</span> <span class="n">bert_attn_mask</span><span class="o">.</span><span class="n">jpg</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>2020-03-06-bart.ipynb           gpt2_simple_mask.jpg
-README.md                       <span class="ansi-cyan-intense-fg ansi-bold">my_icons</span>/
-bert_attn_mask.jpg              t5_mask_diagram.png
-fully_visible_attn_mask_v2.png  tab1.csv
-gpt2_mask.jpeg
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-    
-
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>GPT2, meanwhile, is pretrained to predict the next word.
 This makes it good for producing generations, where there aren't future tokens to consider, but less useful for other downstream tasks where the whole sentence is utilized.</p>
-<p>Here is the <code>attention_mask</code> for GPT2, white squares in y2, x3 show that the prediction for timestep 2 does not depend on the input at timestep 3.</p>
+<p>Here is the <code>attention_mask</code> for GPT2:</p>
 
 </div>
 </div>
@@ -261,9 +230,21 @@ This makes it good for producing generations, where there aren't future tokens t
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Our new friends get the best of both worlds:</p>
+<!-- All together, now:
+![](/blog_v2/images/copied_from_nb/./t5_mask_diagram.png) -->
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Encoder-Decoder">
+<a class="anchor" href="#Encoder-Decoder" aria-hidden="true"><span class="octicon octicon-link"></span></a>Encoder-Decoder<a class="anchor-link" href="#Encoder-Decoder"> </a>
+</h3>
+<p>Our new friends get the best of both worlds!</p>
 <p>The encoder is bidirectional  - each token's attention can attend to every other token in the input sequence, while the decoder, which will ultimately have to perform generation, is causal like GPT2.</p>
-<p>We can think about this attention pattern as smushing together our previous two attention masks, or "Causal Mask  with a fully visible prefix" in fancier terms.<sup class="footnote-ref" id="fnref-4"><a href="#fn-4">1</a></sup></p>
+<p><img src="/blog_v2/images/copied_from_nb/./causal_with_prefix.jpg" alt=""></p>
+<p>We can think about this <code>attention_mask</code> as smushing together our previous two attention masks, or "Causal Mask  with a fully visible prefix" in fancier terms.<sup class="footnote-ref" id="fnref-4"><a href="#fn-4">1</a></sup></p>
 <div class="footnotes">
 <hr>
 <ol>
@@ -277,7 +258,7 @@ This makes it good for producing generations, where there aren't future tokens t
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><img src="/blog_v2/images/copied_from_nb/./t5_mask_diagram.png" alt=""></p>
+<p>Now that we understand the big idea, we are going to focus on using Bart for Summarization.</p>
 
 </div>
 </div>
@@ -285,7 +266,18 @@ This makes it good for producing generations, where there aren't future tokens t
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>This attention pattern is very well suited to summarization and other conditional generation tasks.  You are allowed to attend to the whole document, but as you write your summary, one word at a time, you need only consider what you've already written. The numbers confirm this: all the new fancy guys do a lot better than the old less-fancy guys.</p>
+<h3 id="Summarization">
+<a class="anchor" href="#Summarization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Summarization<a class="anchor-link" href="#Summarization"> </a>
+</h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>During summarization finetuning, the <code>source</code> sequence is the document we want to summarize, and the <code>target</code> sequence is a ground truth summary.
+The Seq2Seq attention pattern is very well suited to summarization and other conditional generation tasks.</p>
+<p>You are allowed to attend to the whole document, but as you write your summary, one word at a time, you need only consider what you've already written. The numbers confirm this: all the new fancy guys do a lot better than the old less-fancy guys.</p>
 
 </div>
 </div>
@@ -302,7 +294,23 @@ This makes it good for producing generations, where there aren't future tokens t
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#collapse-hide </span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'tab1.csv'</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="c1">#df = pd.read_csv('tab1.csv', index_col=0)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">rouge2</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'Bart'</span><span class="p">:</span> <span class="mf">21.28</span><span class="p">,</span>
+ <span class="s1">'UniLM'</span><span class="p">:</span> <span class="mf">20.3</span><span class="p">,</span>
+ <span class="s1">'BertSumABS'</span><span class="p">:</span> <span class="mf">19.39</span><span class="p">,</span>
+ <span class="s1">'T5-base'</span><span class="p">:</span> <span class="mf">20.34</span><span class="p">,</span>
+ <span class="s1">'T5-11B'</span><span class="p">:</span> <span class="mf">21.55</span><span class="p">,</span>
+ <span class="s1">'TransformerAbs'</span><span class="p">:</span> <span class="mf">17.76</span><span class="p">},</span>
+<span class="n">model_size</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'Bart'</span><span class="p">:</span> <span class="s2">"406 M"</span><span class="p">,</span>
+ <span class="s1">'UniLM'</span><span class="p">:</span> <span class="s2">"340 M"</span><span class="p">,</span>
+ <span class="s1">'BertSumABS'</span><span class="p">:</span> <span class="s2">"220 M"</span><span class="p">,</span>
+ <span class="s1">'T5-base'</span><span class="p">:</span> <span class="s2">"770 M"</span><span class="p">,</span>
+ <span class="s1">'T5-11B'</span><span class="p">:</span> <span class="s2">"11 B"</span><span class="p">,</span>
+ <span class="s1">'TransformerAbs'</span><span class="p">:</span> <span class="s2">"200M"</span><span class="p">}</span>
+    <span class="p">))</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">'rouge2'</span><span class="p">)</span>
+
+<span class="n">df</span><span class="p">[</span><span class="s1">'Pretraining'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'None'</span><span class="p">,</span> <span class="s1">'Encoder'</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">'Seq2Seq'</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span>
+<span class="n">df</span><span class="o">.</span><span class="n">rename_axis</span><span class="p">(</span><span class="s1">'Model'</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">'model_size'</span><span class="p">:</span> <span class="s1">'Model Size'</span><span class="p">,</span> <span class="s1">'rouge2'</span><span class="p">:</span> <span class="s1">'Rouge-2'</span><span class="p">})</span>
 </pre></div>
 
     </div>
@@ -335,37 +343,53 @@ This makes it good for producing generations, where there aren't future tokens t
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>CNNDM Rouge 2 score</th>
+      <th>Rouge-2</th>
+      <th>Model Size</th>
+      <th>Pretraining</th>
     </tr>
     <tr>
-      <th>Paper</th>
+      <th>Model</th>
+      <th></th>
+      <th></th>
       <th></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>Bart</th>
-      <td>21.28</td>
-    </tr>
-    <tr>
-      <th>UniLM</th>
-      <td>20.30</td>
+      <th>TransformerAbs</th>
+      <td>17.76</td>
+      <td>200M</td>
+      <td>None</td>
     </tr>
     <tr>
       <th>BertSumABS</th>
       <td>19.39</td>
+      <td>220 M</td>
+      <td>Encoder</td>
     </tr>
     <tr>
-      <th>t5-base</th>
+      <th>UniLM</th>
+      <td>20.30</td>
+      <td>340 M</td>
+      <td>Seq2Seq</td>
+    </tr>
+    <tr>
+      <th>T5-base</th>
       <td>20.34</td>
+      <td>770 M</td>
+      <td>Seq2Seq</td>
     </tr>
     <tr>
-      <th>t5 11B</th>
+      <th>Bart</th>
+      <td>21.28</td>
+      <td>406 M</td>
+      <td>Seq2Seq</td>
+    </tr>
+    <tr>
+      <th>T5-11B</th>
       <td>21.55</td>
-    </tr>
-    <tr>
-      <th>TransformerAbs (2018)</th>
-      <td>17.76</td>
+      <td>11 B</td>
+      <td>Seq2Seq</td>
     </tr>
   </tbody>
 </table>
@@ -387,7 +411,7 @@ This makes it good for producing generations, where there aren't future tokens t
 
 <p><code>BertSumABS</code> [^2] , exploits the Seq2Seq architecture but doesn't pretrain the decoder.
 Also note that t5-11b is 22x bigger than Bart), and pretraining objectives.</p>
-<p>Bart tries out crazy pretraining tasks that you can only do with a seq2seq architecture. Since "Inputs to the encoder need not be aligned with decoder outputs, allowing arbitary noise transformations." They invent a pretraining task called Text Infilling, where you
+<p>Bart tries out crazy pretraining tasks that you can only do with a seq2seq architecture. Since "Inputs to the encoder need not be aligned with decoder outputs, allowing arbitary noise transformations." They use a pretraining task called Text Infilling, where you
 replace a <strong>span</strong> of text with a single mask token. This span can be of any length, so the model also must learn how many tokens to generate.</p>
 <p>There is also another trick in Bart: each decoder layer performs cross-attention over the final hidden state of the encoder output. This presumably nudges Bart towards generating summaries that are closely connected to the original (encoded) text.</p>
 
@@ -435,6 +459,8 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#collapse-hide</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">BartTokenizer</span><span class="p">,</span> <span class="n">BartForConditionalGeneration</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span><span class="p">,</span> <span class="n">Markdown</span>
+
 <span class="n">torch_device</span> <span class="o">=</span> <span class="s1">'cuda'</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">'cpu'</span>
 <span class="k">def</span> <span class="nf">print_80_per_line</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">80</span><span class="p">):</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
@@ -462,53 +488,75 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#collapse-show</span>
-<span class="n">LONG_ARTICLE</span> <span class="o">=</span> <span class="s2">"""</span>
-<span class="s2">(CNN)The Palestinian Authority officially became the 123rd member of the Intern</span>
-<span class="s2">ational Criminal Court on Wednesday, a step that gives the court jurisdiction ov</span>
-<span class="s2">er alleged crimes in Palestinian territories. The formal accession was marked wi</span>
-<span class="s2">th a ceremony at The Hague, in the Netherlands, where the court is based. The Pa</span>
-<span class="s2">lestinians signed the ICC's founding Rome Statute in January, when they also acc</span>
-<span class="s2">epted its jurisdiction over alleged crimes committed "in the occupied Palestinia</span>
-<span class="s2">n territory, including East Jerusalem, since June 13, 2014." Later that month, t</span>
-<span class="s2">he ICC opened a preliminary examination into the situation in Palestinian territ</span>
-<span class="s2">ories, paving the way for possible war crimes investigations against Israelis. A</span>
-<span class="s2">s members of the court, Palestinians may be subject to counter-charges as well. </span>
-<span class="s2">Israel and the United States, neither of which is an ICC member, opposed the Pal</span>
-<span class="s2">estinians' efforts to join the body. But Palestinian Foreign Minister Riad al-Ma</span>
-<span class="s2">lki, speaking at Wednesday's ceremony, said it was a move toward greater justice</span>
-<span class="s2">. "As Palestine formally becomes a State Party to the Rome Statute today, the wo</span>
-<span class="s2">rld is also a step closer to ending a long era of impunity and injustice," he sa</span>
-<span class="s2">id, according to an ICC news release. "Indeed, today brings us closer to our sha</span>
-<span class="s2">red goals of justice and peace." Judge Kuniko Ozaki, a vice president of the ICC</span>
-<span class="s2">, said acceding to the treaty was just the first step for the Palestinians. "As </span>
-<span class="s2">the Rome Statute today enters into force for the State of Palestine, Palestine a</span>
-<span class="s2">cquires all the rights as well as responsibilities that come with being a State </span>
-<span class="s2">Party to the Statute. These are substantive commitments, which cannot be taken l</span>
-<span class="s2">ightly," she said. Rights group Human Rights Watch welcomed the development. "Go</span>
-<span class="s2">vernments seeking to penalize Palestine for joining the ICC should immediately e</span>
-<span class="s2">nd their pressure, and countries that support universal acceptance of the court'</span>
-<span class="s2">s treaty should speak out to welcome its membership," said Balkees Jarrah, inter</span>
-<span class="s2">national justice counsel for the group. "What's objectionable is the attempts to</span>
-<span class="s2"> undermine international justice, not Palestine's decision to join a treaty to w</span>
-<span class="s2">hich over 100 countries around the world are members." In January, when the prel</span>
-<span class="s2">iminary ICC examination was opened, Israeli Prime Minister Benjamin Netanyahu de</span>
-<span class="s2">scribed it as an outrage, saying the court was overstepping its boundaries. The </span>
-<span class="s2">United States also said it "strongly" disagreed with the court's decision. "As w</span>
-<span class="s2">e have said repeatedly, we do not believe that Palestine is a state and therefor</span>
-<span class="s2">e we do not believe that it is eligible to join the ICC," the State Department s</span>
-<span class="s2">aid in a statement. It urged the warring sides to resolve their differences thro</span>
-<span class="s2">ugh direct negotiations. "We will continue to oppose actions against Israel at t</span>
-<span class="s2">he ICC as counterproductive to the cause of peace," it said. But the ICC begs to</span>
-<span class="s2"> differ with the definition of a state for its purposes and refers to the territ</span>
-<span class="s2">ories as "Palestine." While a preliminary examination is not a formal investigat</span>
-<span class="s2">ion, it allows the court to review evidence and determine whether to investigate</span>
-<span class="s2"> suspects on both sides. Prosecutor Fatou Bensouda said her office would "conduc</span>
-<span class="s2">t its analysis in full independence and impartiality." The war between Israel an</span>
-<span class="s2">d Hamas militants in Gaza last summer left more than 2,000 people dead. The inqu</span>
-<span class="s2">iry will include alleged war crimes committed since June. The International Crim</span>
-<span class="s2">inal Court was set up in 2002 to prosecute genocide, crimes against humanity and</span>
-<span class="s2"> war crimes. CNN's Vasco Cotovio, Kareem Khadder and Faith Karimi contributed to</span>
-<span class="s2"> this report.</span>
+<span class="n">LONG_BORING_TENNIS_ARTICLE</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2"> Andy Murray  came close to giving himself some extra preparation time for his w</span>
+<span class="s2">edding next week before ensuring that he still has unfinished tennis business to</span>
+<span class="s2"> attend to. The world No 4 is into the semi-finals of the Miami Open, but not be</span>
+<span class="s2">fore getting a scare from 21 year-old Austrian Dominic Thiem, who pushed him to </span>
+<span class="s2">4-4 in the second set before going down 3-6 6-4, 6-1 in an hour and three quarte</span>
+<span class="s2">rs. Murray was awaiting the winner from the last eight match between Tomas Berdy</span>
+<span class="s2">ch and Argentina's Juan Monaco. Prior to this tournament Thiem lost in the secon</span>
+<span class="s2">d round of a Challenger event to soon-to-be new Brit Aljaz Bedene. Andy Murray p</span>
+<span class="s2">umps his first after defeating Dominic Thiem to reach the Miami Open semi finals</span>
+<span class="s2"> . Muray throws his sweatband into the crowd after completing a 3-6, 6-4, 6-1 vi</span>
+<span class="s2">ctory in Florida . Murray shakes hands with Thiem who he described as a 'strong </span>
+<span class="s2">guy' after the game . And Murray has a fairly simple message for any of his fell</span>
+<span class="s2">ow British tennis players who might be agitated about his imminent arrival into </span>
+<span class="s2">the home ranks: don't complain. Instead the British No 1 believes his colleagues</span>
+<span class="s2"> should use the assimilation of the world number 83, originally from Slovenia, a</span>
+<span class="s2">s motivation to better themselves. At present any grumbles are happening in priv</span>
+<span class="s2">ate, and Bedene's present ineligibility for the Davis Cup team has made it less </span>
+<span class="s2">of an issue, although that could change if his appeal to play is allowed by the </span>
+<span class="s2">International Tennis Federation. Murray thinks anyone questioning the move, now </span>
+<span class="s2">it has become official, would be better working on getting their ranking closer </span>
+<span class="s2">to his. 'If he was 500 in the world they wouldn't be that fussed about it but ob</span>
+<span class="s2">viously he threatens their position a bit,' said the 27 year-old Scot. ' and he'</span>
+<span class="s2">s obviously the British number two, comfortably. 'So they can complain but the b</span>
+<span class="s2">est thing to do is use it in the right way and accept it for what it is, and try</span>
+<span class="s2"> to use it as motivation whether they agree with it or not. He's British now so </span>
+<span class="s2">they've just got to deal with it. Murray stretches for a return after starting h</span>
+<span class="s2">is quarter final match slowly on the show court . Thiem held nothing back as he </span>
+<span class="s2">raced through the opening set, winning it 6-3 with a single break . The young Au</span>
+<span class="s2">strian is considered to be one of the hottest prospects on the ATP Tour . 'I wou</span>
+<span class="s2">ld hope that all the guys who are below him now like James (Ward) , Kyle (Edmund</span>
+<span class="s2">) , Liam (Broady) they will use it as motivation. If he becomes eligible for Dav</span>
+<span class="s2">is Cup then those guys are going to have to prove themselves. 'It can only be se</span>
+<span class="s2">en as a positive for those guys using it to try to get better. He's a good playe</span>
+<span class="s2">r but so are James and Kyle and Liam has improved. Aljaz is there, he's on the t</span>
+<span class="s2">our every week, the other guys aren't quite there yet.' For the first time Murra</span>
+<span class="s2">y, who has an encyclopaedic knowledge of the top 100, gave his opinion of Bedene</span>
+<span class="s2">: 'He's a good player with a very good serve. He's a legitimate top 100 player, </span>
+<span class="s2">when he plays Challengers he's there or thereabouts, when he plays on the main t</span>
+<span class="s2">our he wins matches, it's not like he turns up and always loses in the first rou</span>
+<span class="s2">nd. Murray's fiancee was once again watching from the stands shaded by a huge br</span>
+<span class="s2">immed hat . Kim Sears flashes her enormous diamond engagement ring while watchin</span>
+<span class="s2">g her beau on court . 'He had a bad injury last year (wrist) but has recovered w</span>
+<span class="s2">ell. I would imagine he would keep moving up the rankings although I don't know </span>
+<span class="s2">exactly how high he can go. I've practised with him a couple of times, I haven't</span>
+<span class="s2"> seen him play loads, but when you serve as well as he does it helps. I would im</span>
+<span class="s2">agine he' s going to be comfortably in the top 70 or 80 in the world for a while</span>
+<span class="s2">.' It is understood the Lawn Tennis Association will give background support to </span>
+<span class="s2">his case regarding the Davis Cup but have made it clear that the onus is on him </span>
+<span class="s2">to lead the way. An official statement said: 'To have another player in the men'</span>
+<span class="s2">s top 100 is clearly a positive thing for British tennis and so we very much wel</span>
+<span class="s2">come Aljaz's change in citizenship.' The last comparable switch came twenty year</span>
+<span class="s2">s ago when Greg Rusedski arrived from Canada. It was by no means universally pop</span>
+<span class="s2">ular but, like Bedene, he pledged that he was in for the long haul and, in fairn</span>
+<span class="s2">ess to him, he proved true to his word. Loising the first set shocked Murray int</span>
+<span class="s2">o life as he raced to a commanding lead in the second . The No 3 seed sent over </span>
+<span class="s2">a few glaring looks towards his team before winning the second set . Murray had </span>
+<span class="s2">to put such matters aside as he tackled the unusually talented Thiem, a delight </span>
+<span class="s2">to watch. Coached by Boris Becker's veteran mentor Gunter Bresnik, he slightly r</span>
+<span class="s2">esembles Andy Roddick and hits with similar power but more elegance. His single </span>
+<span class="s2">handed backhand is a thing of rare beauty. However, he has had a mediocre season</span>
+<span class="s2"> coming into this event and there was little to forewarn of his glorious shotmak</span>
+<span class="s2">ing that seemed to catch Murray unawares early on. The world No 4 looked to have</span>
+<span class="s2"> worked him out in the second, but then suffered one of his periopdic mental lap</span>
+<span class="s2">ses and let him back in from 4-1 before closing it out with a break. After break</span>
+<span class="s2">ing him for 3-1 in the decider the Austrian whirlwind burnt itself out. 'He's a </span>
+<span class="s2">strong guy who hits the ball hard and it became a very physical match,' said Mur</span>
+<span class="s2">ray. Murray was presented with a celebratory cake after winning his 500th match </span>
+<span class="s2">in the previous round .</span>
 <span class="s2">"""</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span><span class="s1">''</span><span class="p">)</span>
 </pre></div>
 
@@ -528,12 +576,44 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">BartTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s1">'bart-large-cnn'</span><span class="p">)</span>
-<span class="n">article_input_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">batch_encode_plus</span><span class="p">([</span><span class="n">LONG_ARTICLE</span><span class="p">],</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s1">'pt'</span><span class="p">)[</span><span class="s1">'input_ids'</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch_device</span><span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">BartForConditionalGeneration</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s1">'bart-large-cnn'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">article_input_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">batch_encode_plus</span><span class="p">([</span><span class="n">LONG_BORING_TENNIS_ARTICLE</span><span class="p">],</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s1">'pt'</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">)[</span><span class="s1">'input_ids'</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch_device</span><span class="p">)</span>
 <span class="n">summary_ids</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">,</span> <span class="n">num_beams</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">length_penalty</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
                              <span class="n">max_length</span><span class="o">=</span><span class="mi">140</span><span class="p">,</span> <span class="n">min_len</span><span class="o">=</span><span class="mi">55</span><span class="p">)</span>
-<span class="n">summary_txt</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">summary_ids</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="p">)</span>
-<span class="n">summary_txt</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">summary_txt</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">summary_ids</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="s1">'&gt; '</span><span class="o">+</span><span class="n">summary_txt</span><span class="p">))</span>
 </pre></div>
 
     </div>
@@ -546,9 +626,11 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="output_area">
 
 
+<div class="output_markdown rendered_html output_subarea ">
+<blockquote>
+<p>Andy Murray beat Dominic Thiem 3-6, 6-4, 6-1 in the Miami Open. The world No 4 is into the semi-finals of the tournament in Florida. Murray was awaiting the winner from the last eight match between Tomas Berdych and Argentina's Juan Monaco. Thiem lost in the second round of a Challenger event to Aljaz Bedene.</p>
+</blockquote>
 
-<div class="output_text output_subarea output_execute_result">
-<pre>"&lt;s&gt;The Palestinian Authority becomes the 123rd member of the International Criminal Court. The move gives the court jurisdiction over alleged crimes in Palestinian territories. Israel and the United States opposed the Palestinians' efforts to join the body. But Palestinian Foreign Minister Riad al-Malki said it was a move toward greater justice."</pre>
 </div>
 
 </div>
@@ -559,17 +641,6 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 </div>
     
 
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><code>TODO(SS): output of above gets smushed into one line</code></p>
-<blockquote>
-<p>The Palestinian Authority becomes the 123rd member of the International Criminal Court. The move gives the court jurisdiction over alleged crimes in Palestinian territories. Israel and the United States opposed the Palestinians' efforts to join the body. But Palestinian Foreign Minister Riad al-Malki said it was a move toward greater justice.</p>
-</blockquote>
-
-</div>
-</div>
-</div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -599,7 +670,7 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="text_cell_render border-box-sizing rendered_html">
 <p></p>
 <div class="flash">
-    <svg class="octicon octicon-info octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
+    <svg class="octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
     <strong>Note: </strong>The same correspondence exists between <code>BartForSequenceClassification</code>  and all the other <code>*ForSequenceClassification</code> in <code>transformers</code>.
 </div>
 
