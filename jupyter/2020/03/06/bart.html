@@ -9,34 +9,34 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="A journey through the forward pass" />
 <meta property="og:description" content="A journey through the forward pass" />
-<link rel="canonical" href="https://sshleifer.github.io/tensorgoose/jupyter/2020/03/06/bart.html" />
-<meta property="og:url" content="https://sshleifer.github.io/tensorgoose/jupyter/2020/03/06/bart.html" />
+<link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html" />
+<meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html" />
 <meta property="og:site_name" content="TensorGoose" />
-<meta property="og:image" content="https://sshleifer.github.io/tensorgoose/images/chart-preview.png" />
+<meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/chart-preview.png" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2020-03-06T00:00:00-06:00" />
 <script type="application/ld+json">
-{"datePublished":"2020-03-06T00:00:00-06:00","headline":"Bart WalkThrough","image":"https://sshleifer.github.io/tensorgoose/images/chart-preview.png","description":"A journey through the forward pass","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/tensorgoose/jupyter/2020/03/06/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/tensorgoose/jupyter/2020/03/06/bart.html","dateModified":"2020-03-06T00:00:00-06:00","@context":"https://schema.org"}</script>
+{"datePublished":"2020-03-06T00:00:00-06:00","headline":"Bart WalkThrough","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"A journey through the forward pass","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html","dateModified":"2020-03-06T00:00:00-06:00","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
-<link rel="stylesheet" href="/tensorgoose/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/tensorgoose/feed.xml" title="TensorGoose" /><link rel="shortcut icon" type="image/x-icon" href="/tensorgoose/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<link rel="stylesheet" href="/blog_v2/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/blog_v2/feed.xml" title="TensorGoose" /><link rel="shortcut icon" type="image/x-icon" href="/blog_v2/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
 <title>Bart WalkThrough | TensorGoose</title>
 <meta name="generator" content="Jekyll v4.0.0" />
 <meta property="og:title" content="Bart WalkThrough" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="A journey through the forward pass" />
 <meta property="og:description" content="A journey through the forward pass" />
-<link rel="canonical" href="https://sshleifer.github.io/tensorgoose/jupyter/2020/03/06/bart.html" />
-<meta property="og:url" content="https://sshleifer.github.io/tensorgoose/jupyter/2020/03/06/bart.html" />
+<link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html" />
+<meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html" />
 <meta property="og:site_name" content="TensorGoose" />
-<meta property="og:image" content="https://sshleifer.github.io/tensorgoose/images/chart-preview.png" />
+<meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/chart-preview.png" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2020-03-06T00:00:00-06:00" />
 <script type="application/ld+json">
-{"datePublished":"2020-03-06T00:00:00-06:00","headline":"Bart WalkThrough","image":"https://sshleifer.github.io/tensorgoose/images/chart-preview.png","description":"A journey through the forward pass","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/tensorgoose/jupyter/2020/03/06/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/tensorgoose/jupyter/2020/03/06/bart.html","dateModified":"2020-03-06T00:00:00-06:00","@context":"https://schema.org"}</script>
+{"datePublished":"2020-03-06T00:00:00-06:00","headline":"Bart WalkThrough","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"A journey through the forward pass","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html","dateModified":"2020-03-06T00:00:00-06:00","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 <link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
-<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/tensorgoose/feed.xml" title="TensorGoose" />
+<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/blog_v2/feed.xml" title="TensorGoose" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
     <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"> </script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
@@ -88,7 +88,7 @@ window.onload = wrap_img;
 </script>
 </head><body><header class="site-header">
 
-  <div class="wrapper"><a class="site-title" rel="author" href="/tensorgoose/">TensorGoose</a><nav class="site-nav">
+  <div class="wrapper"><a class="site-title" rel="author" href="/blog_v2/">TensorGoose</a><nav class="site-nav">
         <input type="checkbox" id="nav-trigger" class="nav-trigger" />
         <label for="nav-trigger">
           <span class="menu-icon">
@@ -98,7 +98,7 @@ window.onload = wrap_img;
           </span>
         </label>
 
-        <div class="trigger"><a class="page-link" href="/tensorgoose/about/">About Me</a><a class="page-link" href="/tensorgoose/search/">Search</a><a class="page-link" href="/tensorgoose/categories/">Tags</a></div>
+        <div class="trigger"><a class="page-link" href="/blog_v2/about/">About Me</a><a class="page-link" href="/blog_v2/search/">Search</a><a class="page-link" href="/blog_v2/categories/">Tags</a></div>
       </nav></div>
 </header>
 <main class="page-content" aria-label="Content">
@@ -119,7 +119,7 @@ window.onload = wrap_img;
     
       <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
       
-        <a class="category-tags-link" href="/tensorgoose/categories/#jupyter">jupyter</a>
+        <a class="category-tags-link" href="/blog_v2/categories/#jupyter">jupyter</a>
         
       
       </p>
@@ -131,11 +131,11 @@ window.onload = wrap_img;
           <div class="px-2">
 
     <a href="https://github.com/sshleifer/blog_v2/tree/master/_notebooks/2020-03-06-bart.ipynb" role="button">
-<img class="notebook-badge-image" src="/tensorgoose/assets/badges/github.svg" alt="View On GitHub">
+<img class="notebook-badge-image" src="/blog_v2/assets/badges/github.svg" alt="View On GitHub">
     </a>
 </div><div class="px-2">
     <a href="https://colab.research.google.com/github/sshleifer/blog_v2/blob/master/_notebooks/2020-03-06-bart.ipynb">
-        <img class="notebook-badge-image" src="/tensorgoose/assets/badges/colab.svg" alt="Open In Colab"/>
+        <img class="notebook-badge-image" src="/blog_v2/assets/badges/colab.svg" alt="Open In Colab"/>
     </a>
 </div>
         </div>
@@ -1002,20 +1002,20 @@ Most of our other models do not make inputs for the user -- that's the tokenizer
         theme="github-light"
         crossorigin="anonymous"
         async>
-</script><a class="u-url" href="/tensorgoose/jupyter/2020/03/06/bart.html" hidden></a>
+</script><a class="u-url" href="/blog_v2/jupyter/2020/03/06/bart.html" hidden></a>
 </article>
       </div>
     </main><footer class="site-footer h-card">
-  <data class="u-url" href="/tensorgoose/"></data>
+  <data class="u-url" href="/blog_v2/"></data>
 
   <div class="wrapper">
 
     <div class="footer-col-wrapper">
       <div class="footer-col">
         <p class="feed-subscribe">
-          <a href="/tensorgoose/feed.xml">
+          <a href="/blog_v2/feed.xml">
             <svg class="svg-icon orange">
-              <use xlink:href="/tensorgoose/assets/minima-social-icons.svg#rss"></use>
+              <use xlink:href="/blog_v2/assets/minima-social-icons.svg#rss"></use>
             </svg><span>Subscribe</span>
           </a>
         </p>
@@ -1025,7 +1025,7 @@ Most of our other models do not make inputs for the user -- that's the tokenizer
       </div>
     </div>
 
-    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/sshleifer" title="sshleifer"><svg class="svg-icon grey"><use xlink:href="/tensorgoose/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/sam_shleifer" title="sam_shleifer"><svg class="svg-icon grey"><use xlink:href="/tensorgoose/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/sshleifer" title="sshleifer"><svg class="svg-icon grey"><use xlink:href="/blog_v2/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/sam_shleifer" title="sam_shleifer"><svg class="svg-icon grey"><use xlink:href="/blog_v2/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
 </div>
 
   </div>
