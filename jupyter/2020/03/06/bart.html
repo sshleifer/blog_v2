@@ -96,7 +96,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      15 min read
+      16 min read
     
 </span></p>
 
@@ -134,8 +134,8 @@ window.onload = wrap_img;
 <li class="toc-entry toc-h3"><a href="#BartForConditionalGeneration">BartForConditionalGeneration </a></li>
 <li class="toc-entry toc-h2"><a href="#Incremental-Decoding">Incremental Decoding </a>
 <ul>
-<li class="toc-entry toc-h3"><a href="#Partially-caching-k-and-v-in-DecoderLayer">Partially caching k and v in DecoderLayer </a></li>
 <li class="toc-entry toc-h3"><a href="#Conclusion">Conclusion </a></li>
+<li class="toc-entry toc-h3"><a href="#Bonus:-Partially-caching-k-and-v-in-DecoderLayer">Bonus: Partially caching k and v in DecoderLayer </a></li>
 </ul>
 </li>
 <li class="toc-entry toc-h2"><a href="#Footnotes">Footnotes </a>
@@ -680,7 +680,7 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>GPT2 (which in fairness is not finetuned for summarization) cannot really continue the tennis article sensically and can't generate past 1024 tokens.</p>
+<p>GPT2 (which in fairness is not finetuned for summarization) cannot really continue the tennis article sensically or generate process as many tokens.</p>
 
 </div>
 </div>
@@ -768,6 +768,19 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>Now that we have an understanding of Bart, lets scurry over some interestring tricks we use to make generation faster.
+</p>
+<div class="flash flash-error">
+    <svg class="octicon octicon-alert" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 000 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 00.01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg>
+    <strong>Warning: </strong>The following has a heavier engineering focus than the rest of the post
+</div>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Incremental-Decoding">
 <a class="anchor" href="#Incremental-Decoding" aria-hidden="true"><span class="octicon octicon-link"></span></a>Incremental Decoding<a class="anchor-link" href="#Incremental-Decoding"> </a>
 </h2>
@@ -777,9 +790,8 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>When I first read the fairseq code, there was a function called <code>make_generation_fast</code> which didnt do much besides catch my eye. What an exciting name! 
-Anyways, here is a really slow (pseudocode) way to greedily generate summaries</p>
-<div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+<p>Anyways, here is a really slow (pseudocode) way to greedily generate summaries</p>
+<div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">bos</span><span class="p">]</span>
 <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
      <span class="n">encoder_hidden_state</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">)</span>
      <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">encoder_hidden_state</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">)</span>
@@ -794,7 +806,30 @@ Anyways, here is a really slow (pseudocode) way to greedily generate summaries</
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>We can just cache the first step and save half the compute</p>
+<p>Let's say <code>N = len(article_input_ids)</code> and <code>M = len(output_tokens)</code> when we return. Let's also ignore the cost of encoder-decoder attention.
+Then the complexity of this approach is roughly</p>
+<ul>
+<li>$(N \cdot M)$ (we call the encoder <code>M</code> times on <code>N</code> tokens)</li>
+<li>$\sum_{m=1}^{M} m = \frac{M(M+1)}{2}$   (we call the encoder <code>M</code> times on 1 token then 2 tokens, etc).</li>
+<li>Total: $N \cdot M  + \frac{M(M+1)}{2}$</li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's say we are generating a 100 token summary of a 1024 token article, then we have to "process"
+$N \cdot M  + \frac{M(M+1)}{2} =  107,450$ tokens</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Thankfully, we can just hoist the <code>encoder</code> call outside the loop!</p>
 <div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">encoder_hidden_state</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">)</span>
 <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
@@ -804,7 +839,6 @@ Anyways, here is a really slow (pseudocode) way to greedily generate summaries</
      <span class="n">output_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_word</span><span class="p">)</span>
      <span class="k">if</span> <span class="n">next_word</span> <span class="o">==</span> <span class="n">eos</span><span class="p">:</span> <span class="k">break</span>
 </pre></div>
-<p>Easy peasy, sorry for wasting your time. Here comes the fun one</p>
 
 </div>
 </div>
@@ -812,8 +846,47 @@ Anyways, here is a really slow (pseudocode) way to greedily generate summaries</
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Partially-caching-k-and-v-in-DecoderLayer">
-<a class="anchor" href="#Partially-caching-k-and-v-in-DecoderLayer" aria-hidden="true"><span class="octicon octicon-link"></span></a>Partially caching k and v in <code>DecoderLayer</code><a class="anchor-link" href="#Partially-caching-k-and-v-in-DecoderLayer"> </a>
+<p>Now the complexity is drastically reduced: $N \cdot 1  + \frac{M(M+1)}{2} = 6,074$</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>But we can actually go even further, and partially cache the attention outputs for the decoder.
+This will change our generation loop to:</p>
+<div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">encoder_hidden_state</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">)</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+     <span class="n">logits</span><span class="p">,</span> <span class="n">cache</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">encoder_hidden_state</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">)</span>
+     <span class="n">next_word</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+     <span class="n">output_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_word</span><span class="p">)</span>
+     <span class="k">if</span> <span class="n">next_word</span> <span class="o">==</span> <span class="n">eos</span><span class="p">:</span> <span class="k">break</span>
+</pre></div>
+<p>And change our formula to $N + M = 1,124$</p>
+<p>The nitty-gritty of this trick is explained in the Bonus section below.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Conclusion">
+<a class="anchor" href="#Conclusion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusion<a class="anchor-link" href="#Conclusion"> </a>
+</h3>
+<p>Our first release of <code>BartModel</code> prioritized moving quickly and keeping the code simple. We want to see how the community uses it! As a result, our implementation is about 30\% slower and uses more memory than the authors'. Stay tuned for episode 2 of this series, where we try to close the gap.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Bonus:-Partially-caching-k-and-v-in-DecoderLayer">
+<a class="anchor" href="#Bonus:-Partially-caching-k-and-v-in-DecoderLayer" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bonus: Partially caching k and v in <code>DecoderLayer</code><a class="anchor-link" href="#Bonus:-Partially-caching-k-and-v-in-DecoderLayer"> </a>
 </h3>
 <p>Here is some pseudocode for attention without all the reshapes and heads and masks and scaling.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SimplifiedAttention</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
@@ -862,19 +935,7 @@ Anyways, here is a really slow (pseudocode) way to greedily generate summaries</
 <div class="highlight"><pre><span></span><span class="n">k</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">past_key</span><span class="p">,</span> <span class="n">new_k</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="s1">'seq_len'</span><span class="p">)</span> <span class="c1"># the seq_len dimension, </span>
 <span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">past_value</span><span class="p">,</span> <span class="n">new_v</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="s1">'seq_len'</span><span class="p">)</span>
 </pre></div>
-<p><code>TODO(SS): Why cant we cache part of q?</code></p>
 <p>Of the 8 <code>F.linear</code> ops performed by each DecoderLayer was doing, we've managed to completely cache 2 of them, and almost completely cache 2 more. Overall, we chop off about 40% of the runtime. <code>TODO(SS): verify</code>.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Conclusion">
-<a class="anchor" href="#Conclusion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusion<a class="anchor-link" href="#Conclusion"> </a>
-</h3>
-<p>Our first release of <code>BartModel</code> prioritized moving quickly and keeping the code simple. As a result, our implementation is about 30\% slower and uses more memory than the authors'. Stay tuned for episode 2 of this series, where we try to close the gap.</p>
 
 </div>
 </div>
