@@ -875,7 +875,7 @@ pip install -e ".[dev]"
 Then the complexity of this approach is roughly</p>
 <ul>
 <li>$(N \cdot M)$ (we call the encoder <code>M</code> times on <code>N</code> tokens)</li>
-<li>$\sum_{m=1}^{M} m = \frac{M(M+1)}{2}$   (we call the encoder <code>M</code> times on 1 token then 2 tokens, etc).</li>
+<li>$+ \sum_{m=1}^{M} m = \frac{M(M+1)}{2}$   (we call the decoder <code>M</code> times on 1 token then 2 tokens, all the way to M tokens).</li>
 <li>Total: $N \cdot M  + \frac{M(M+1)}{2}$</li>
 </ul>
 
@@ -921,7 +921,7 @@ $N \cdot M  + \frac{M(M+1)}{2} =  107,450$ tokens</p>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Thankfully, we can just hoist the <code>encoder</code> call outside the loop!</p>
-<div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+<div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">bos</span><span class="p">]</span>
 <span class="n">encoder_hidden_state</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">)</span>
 <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
      <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">encoder_hidden_state</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">)</span>
@@ -947,7 +947,7 @@ $N \cdot M  + \frac{M(M+1)}{2} =  107,450$ tokens</p>
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>But we can  go even further, and partially cache the attention outputs for the decoder.
 This will change our generation loop to:</p>
-<div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+<div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">bos</span><span class="p">]</span>
 <span class="n">encoder_hidden_state</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">)</span>
 <span class="n">cache</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
