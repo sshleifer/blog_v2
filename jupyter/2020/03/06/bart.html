@@ -194,7 +194,7 @@ window.onload = wrap_img;
 </h3>
 <p>As the Bart authors' write,</p>
 <blockquote>
-<p>(Bart) can be seen as generalizing Bert (due to the bidirectional encoder) and GPT (with the left to right decoder).</p>
+<p>(Bart) can be seen as generalizing Bert (due to the bidirectional encoder) and GPT2 (with the left to right decoder).</p>
 </blockquote>
 <p>Bert is pretrained to try to predict masked tokens, and uses the whole sequence to get enough info to make a good guess. This is good for tasks where the prediction at position <code>i</code> is allowed to utilize information from positions after <code>i</code>, but less useful for tasks where you are not, like text generation, where you generate the next word conditional on the previously generated words.</p>
 <p>In code, the idea of "what information you can use when predicting the token at position <code>i</code>" is controlled by a parameter called <code>attention_mask</code><sup class="footnote-ref" id="fnref-2"><a href="#fn-2">1</a></sup>. 
@@ -216,8 +216,7 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>GPT2, meanwhile, is pretrained to predict the next word.
-This makes it good for producing generations, where there aren't future tokens to consider, but less useful for other downstream tasks where the whole sentence is utilized.</p>
+<p>GPT2, meanwhile, is pretrained to predict the next word using a causal mask: and is more effective for generation tasks, but less effective on downstream tasks where the whole input yields information for the output.</p>
 <p>Here is the <code>attention_mask</code> for GPT2:</p>
 
 </div>
@@ -257,7 +256,12 @@ This makes it good for producing generations, where there aren't future tokens t
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<!-- Now that we understand the big idea, we are going to focus on using Bart for Summarization. -->
+<p></p>
+<div class="flash">
+    <svg class="octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
+    <strong>Note: </strong>The encoder and decoder are connected: each decoder layer performs attention over the final hidden state of the encoder output. This presumably nudges the models towards generating output that is closely connected to the original input.
+</div>
+
 </div>
 </div>
 </div>
@@ -274,7 +278,7 @@ This makes it good for producing generations, where there aren't future tokens t
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>During summarization finetuning, the <code>input</code> sequence is the document we want to summarize, and the <code>output</code> sequence is a ground truth summary.
-The Seq2Seq attention pattern is therefore very well suited to summarization and other conditional generation tasks. We are allowed to attend to the whole <code>input</code> document, but, as we write our summary, we can only consider what we've already written. The numbers confirm this: all the new fancy guys do a lot better than the old less-fancy guys on the CNN/Daily Mail summarization task.</p>
+The Seq2Seq attention pattern is therefore well suited to summarization and other conditional generation tasks. Seq2Seq models are allowed to attend to the whole <code>input</code> document, but, as they generate a summary, they can only consider what they've already generated. The numbers confirm this: all the new fancy Seq2Seq models do a lot better than the old less-fancy guys on the CNN/Daily Mail abstractive summarization task, and Bart does especially well.</p>
 
 </div>
 </div>
@@ -292,13 +296,18 @@ The Seq2Seq attention pattern is therefore very well suited to summarization and
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#collapse-hide </span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="c1">#df = pd.read_csv('tab1.csv', index_col=0)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">rouge2</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'Bart'</span><span class="p">:</span> <span class="mf">21.28</span><span class="p">,</span>
+<span class="n">pt_name</span> <span class="o">=</span> <span class="s1">'PT-Gen (not seq2seq)'</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">rouge2</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">pt_name</span><span class="p">:</span> <span class="mf">17.28</span><span class="p">,</span>
+    <span class="s1">'Bart'</span><span class="p">:</span> <span class="mf">21.28</span><span class="p">,</span>
  <span class="s1">'UniLM'</span><span class="p">:</span> <span class="mf">20.3</span><span class="p">,</span>
  <span class="s1">'BertSumABS'</span><span class="p">:</span> <span class="mf">19.39</span><span class="p">,</span>
  <span class="s1">'T5-base'</span><span class="p">:</span> <span class="mf">20.34</span><span class="p">,</span>
  <span class="s1">'T5-11B'</span><span class="p">:</span> <span class="mf">21.55</span><span class="p">,</span>
  <span class="s1">'TransformerAbs'</span><span class="p">:</span> <span class="mf">17.76</span><span class="p">},</span>
-<span class="n">model_size</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'Bart'</span><span class="p">:</span> <span class="s2">"406 M"</span><span class="p">,</span>
+<span class="n">model_size</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">pt_name</span><span class="p">:</span> <span class="s2">"22 M"</span><span class="p">,</span>
+    <span class="s1">'Bart'</span><span class="p">:</span> <span class="s2">"406 M"</span><span class="p">,</span>
  <span class="s1">'UniLM'</span><span class="p">:</span> <span class="s2">"340 M"</span><span class="p">,</span>
  <span class="s1">'BertSumABS'</span><span class="p">:</span> <span class="s2">"220 M"</span><span class="p">,</span>
  <span class="s1">'T5-base'</span><span class="p">:</span> <span class="s2">"770 M"</span><span class="p">,</span>
@@ -306,7 +315,7 @@ The Seq2Seq attention pattern is therefore very well suited to summarization and
  <span class="s1">'TransformerAbs'</span><span class="p">:</span> <span class="s2">"200M"</span><span class="p">}</span>
     <span class="p">))</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">'rouge2'</span><span class="p">)</span>
 
-<span class="n">df</span><span class="p">[</span><span class="s1">'Pretraining'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'None'</span><span class="p">,</span> <span class="s1">'Encoder'</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">'Seq2Seq'</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">'Pretraining'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'None'</span><span class="p">,</span> <span class="s1">'None'</span><span class="p">,</span> <span class="s1">'Encoder'</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">'Seq2Seq'</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span>
 <span class="n">df</span><span class="o">.</span><span class="n">rename_axis</span><span class="p">(</span><span class="s1">'Model'</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">'model_size'</span><span class="p">:</span> <span class="s1">'Model Size'</span><span class="p">,</span> <span class="s1">'rouge2'</span><span class="p">:</span> <span class="s1">'Rouge-2'</span><span class="p">})</span>
 </pre></div>
 
@@ -352,6 +361,12 @@ The Seq2Seq attention pattern is therefore very well suited to summarization and
     </tr>
   </thead>
   <tbody>
+    <tr>
+      <th>PT-Gen (not seq2seq)</th>
+      <td>17.28</td>
+      <td>22 M</td>
+      <td>None</td>
+    </tr>
     <tr>
       <th>TransformerAbs</th>
       <td>17.76</td>
@@ -404,17 +419,11 @@ The Seq2Seq attention pattern is therefore very well suited to summarization and
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><!-- I start with this not to say that the researchers are lame, but that they were all discovering a very cool idea at the same time. In the following table, you can see that, at least for summarization, it is important to pretrain with a bidirectional encoder and causal decoder: (The UniLM `prefix_lm` is equivalent [^3]) -->
-</p>
+<p></p>
 <div class="flash">
-    <svg class="octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
-    <strong>Note: </strong><code>BertSumABS</code> (from <a href="https://arxiv.org/abs/1908.08345"><em>Text Summarization with Pretrained Encoders</em></a>, uses a Seq2Seq architecture but doesn’t pretrain the decoder. <code>TransformerAbs</code>, from the same paper, uses a slightly smaller model and no pretraining.
+    <svg class="octicon octicon-info octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
+    <strong>Note: </strong><code>BertSumABS</code> (from <a href="https://arxiv.org/abs/1908.08345"><em>Text Summarization with Pretrained Encoders</em></a>, uses a Seq2Seq architecture but doesn’t pretrain the decoder. <code>TransformerAbs</code>, from the same paper, uses a slightly smaller model and no pretraining. <code>PT-Gen</code> is from <a href="https://arxiv.org/pdf/1704.04368.pdf">Get To The Point: Summarization with Pointer-Generator Networks</a>
 </div>
-Shortly after these papers were released, people wanted to use them in <code>transformers</code>, with lots of attention dedicated to Bart, which we introduce today.
-<p>Bart tries out crazy pretraining tasks that you can only do with a seq2seq architecture. Since "Inputs to the encoder need not be aligned with decoder outputs, allowing arbitary noise transformations." They use a pretraining task called Text Infilling, where you
-replace a <strong>span</strong> of text with a single mask token. This span can be of any length, so the model also must learn how many tokens to generate.</p>
-<p>There is also another trick in Bart: each decoder layer performs cross over the final hidden state of the encoder output. This presumably nudges Bart towards generating summaries that are closely connected to the original (encoded) text.</p>
-<p>And now, lets use <code>BartForConditionalGeneration</code> to summarize a boring article about tennis from the CNN dataset.</p>
 
 </div>
 </div>
@@ -425,6 +434,13 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <h3 id="BartForConditionalGeneration">
 <a class="anchor" href="#BartForConditionalGeneration" aria-hidden="true"><span class="octicon octicon-link"></span></a><code>BartForConditionalGeneration</code><a class="anchor-link" href="#BartForConditionalGeneration"> </a>
 </h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<!-- Bart uses a "novel pretraining task", called Text Infilling which is only possible with a Seq2Seq architecture. For this task, **span** of text is replaced with a single `<mask>` token. This span can be of any length, forcing the model to learn how many tokens to generate. -->
 </div>
 </div>
 </div>
@@ -447,9 +463,22 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#collapse-hide</span>
+<span class="n">INSTALL_MSG</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">Bart will be released through pip in v 3.0.0, until then you can use it by installing from source:</span>
+
+
+<span class="s2">git clone git@github.com:huggingface/transformers.git</span>
+<span class="s2">cd transformers</span>
+<span class="s2">pip install -e ".[dev]"</span>
+
+<span class="s2">"""</span>
+
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">transformers</span>  <span class="c1">#  Installed from source at commit e03129ad</span>
-<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">BartTokenizer</span><span class="p">,</span> <span class="n">BartForConditionalGeneration</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">BartTokenizer</span><span class="p">,</span> <span class="n">BartForConditionalGeneration</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">INSTALL_MSG</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span><span class="p">,</span> <span class="n">Markdown</span>
 
 <span class="n">torch_device</span> <span class="o">=</span> <span class="s1">'cuda'</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">'cpu'</span>
@@ -465,21 +494,6 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 </div>
 
     </details>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>transformers installed from source
--e git+git@github.com:sshleifer/transformers_fork.git@4f9d1f20c3950d81e097c1409d8165a2577fcf32#egg=transformers
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
 </div>
     
 
@@ -661,9 +675,13 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">GPT2LMHeadModel</span><span class="p">,</span> <span class="n">GPT2Tokenizer</span>
 <span class="n">gpt2_tok</span> <span class="o">=</span> <span class="n">GPT2Tokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s1">'gpt2'</span><span class="p">)</span>
 <span class="n">gpt2_model</span> <span class="o">=</span> <span class="n">GPT2LMHeadModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s1">'gpt2'</span><span class="p">,</span> <span class="n">output_past</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">enc</span> <span class="o">=</span> <span class="n">gpt2_tok</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">LONG_BORING_TENNIS_ARTICLE</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">1024</span><span class="o">-</span><span class="mi">155</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s1">'pt'</span><span class="p">)</span>
-<span class="n">summary_ids</span> <span class="o">=</span> <span class="n">gpt2_model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">enc</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">do_sample</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">source</span><span class="p">,</span> <span class="n">generated</span> <span class="o">=</span> <span class="n">gpt2_tok</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">summary_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"An official statement said:"</span><span class="p">)</span>
+<span class="c1"># truncate to 869 tokens so that we have space to generate another 155</span>
+<span class="n">enc</span> <span class="o">=</span> <span class="n">gpt2_tok</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">LONG_BORING_TENNIS_ARTICLE</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">1024</span><span class="o">-</span><span class="mi">155</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s1">'pt'</span><span class="p">)</span> 
+<span class="c1"># Generate another 155 tokens</span>
+<span class="n">source_and_summary_ids</span> <span class="o">=</span> <span class="n">gpt2_model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">enc</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">do_sample</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="c1"># Only show the new ones</span>
+<span class="n">end_of_source</span> <span class="o">=</span> <span class="s2">"An official statement said:"</span> 
+<span class="n">_</span><span class="p">,</span> <span class="n">summary_gpt2</span> <span class="o">=</span> <span class="n">gpt2_tok</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">source_and_summary_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">end_of_source</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -671,13 +689,27 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 </div>
 
     </details>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Setting `pad_token_id` to 50256 (first `eos_token_id`) to generate sequence
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
 </div>
     
 
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>GPT2 (which in fairness is not finetuned for summarization) cannot really continue the tennis article sensically or generate process as many tokens.</p>
+<p>GPT2 (which in fairness is not finetuned for summarization) cannot really continue the tennis article sensically.</p>
 
 </div>
 </div>
@@ -689,7 +721,7 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="s1">'&gt; **GPT2:** '</span> <span class="o">+</span> <span class="n">generated</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="s1">'&gt; **GPT2:** '</span> <span class="o">+</span> <span class="n">summary_gpt2</span><span class="p">))</span>
 </pre></div>
 
     </div>
@@ -730,7 +762,7 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="text_cell_render border-box-sizing rendered_html">
 <p></p>
 <div class="flash">
-    <svg class="octicon octicon-info octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
     <strong>Note: </strong>The same correspondence exists between <code>BartForSequenceClassification</code>  and all the other <code>*ForSequenceClassification</code> in <code>transformers</code> -- they only require one argument: <code>input_ids</code>.
 </div>
 
@@ -740,25 +772,22 @@ replace a <strong>span</strong> of text with a single mask token. This span can 
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The full signature, however, is a little more complex.</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">input_ids</span><span class="p">,</span>
-    <span class="n">attention_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># ignored pad tokens in input_ids</span>
-    <span class="n">decoder_input_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># make these if not supplied</span>
-    <span class="n">decoder_padding_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># ignored pad tokens in decoder_input_ids</span>
-    <span class="n">decoder_causal_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># Ignore future tokens in decoder_input_ids</span>
-<span class="p">):</span>
-</pre></div>
-<p>During summarization finetuning, or seq2seq pretraining, we need to pass <code>decoder_input_ids</code>. (the masks will be made for you if you dont supply them).</p>
-<p>When we're not, like in a classification context, you can safely ignore all the decoder kwargs and <code>BartModel</code> will make them for you<sup class="footnote-ref" id="fnref-5"><a href="#fn-5">1</a></sup></p>
-<div class="footnotes">
-<hr>
-<ol>
-<li id="fn-5"><p>How? by taking the input_ids (movie review) and shifting them to the right. Random, I know. The authors' <a href="https://github.com/pytorch/fairseq/issues/1389">motivation</a> for the shift-right trick was to facilitate teacher forcing during pre-training, and now that the model has been trained on 64 TPUs for 12 weeks to process this input format, we continue the pattern during inference, but hide it inside the forward method.<a href="#fnref-5" class="footnote">↩</a></p></li>
-</ol>
-</div>
+<!-- The `BartForConditionalGeneration`'s full signature, however, is a little more complex.
+```python
+def forward(
+    self,
+    input_ids,
+    attention_mask=None, # ignored pad tokens in input_ids
+    decoder_input_ids=None, # make these if not supplied
+    decoder_padding_mask=None, # ignored pad tokens in decoder_input_ids
+    decoder_causal_mask=None, # Ignore future tokens in decoder_input_ids
+):
+```
+During summarization finetuning, or seq2seq pretraining, it requires `decoder_input_ids`. (the masks will be made for you if you dont supply them).
 
+When we're not, like in a classification context, you can safely ignore all the decoder kwargs and `BartModel` will make them for you[^5] 
+
+[^5]: How? by taking the input_ids (movie review) and shifting them to the right. Random, I know. The authors' [motivation](https://github.com/pytorch/fairseq/issues/1389) for the shift-right trick was to facilitate teacher forcing during pre-training, and now that the model has been trained on 64 TPUs for 12 weeks to process this input format, we continue the pattern during inference, but hide it inside the forward method. -->
 </div>
 </div>
 </div>
