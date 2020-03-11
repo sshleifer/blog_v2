@@ -108,150 +108,74 @@ the 1 in the top left cell means that the model can use information from <code>&
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>During summarization finetuning, the <code>input</code> sequence is the document we want to summarize, and the <code>output</code> sequence is a ground truth summary.
+<p>Now, we apply this Seq2Seq method to summarization, where the <code>input</code> sequence is the document we want to summarize, and the <code>output</code> sequence is a ground truth summary.
 The Seq2Seq attention pattern is therefore well suited to summarization and other conditional generation tasks. Seq2Seq models are allowed to attend to the whole <code>input</code> document, but, as they generate a summary, they can only consider what they've already generated. The numbers confirm this: all the new fancy Seq2Seq models do a lot better than the old less-fancy guys on the CNN/Daily Mail abstractive summarization task, and Bart does especially well.</p>
 
 </div>
 </div>
 </div>
-    
-    
-<div class="cell border-box-sizing code_cell rendered">
-<details class="description">
-      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
-        <p><div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#collapse-hide </span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="c1">#df = pd.read_csv(&#39;tab1.csv&#39;, index_col=0)</span>
-<span class="n">pt_name</span> <span class="o">=</span> <span class="s1">&#39;PT-Gen (not seq2seq)&#39;</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">rouge2</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">pt_name</span><span class="p">:</span> <span class="mf">17.28</span><span class="p">,</span>
-    <span class="s1">&#39;Bart&#39;</span><span class="p">:</span> <span class="mf">21.28</span><span class="p">,</span>
- <span class="s1">&#39;UniLM&#39;</span><span class="p">:</span> <span class="mf">20.3</span><span class="p">,</span>
- <span class="s1">&#39;BertSumABS&#39;</span><span class="p">:</span> <span class="mf">19.39</span><span class="p">,</span>
- <span class="s1">&#39;T5-base&#39;</span><span class="p">:</span> <span class="mf">20.34</span><span class="p">,</span>
- <span class="s1">&#39;T5-11B&#39;</span><span class="p">:</span> <span class="mf">21.55</span><span class="p">,</span>
- <span class="s1">&#39;TransformerAbs&#39;</span><span class="p">:</span> <span class="mf">17.76</span><span class="p">},</span>
-<span class="n">model_size</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">pt_name</span><span class="p">:</span> <span class="s2">&quot;22 M&quot;</span><span class="p">,</span>
-    <span class="s1">&#39;Bart&#39;</span><span class="p">:</span> <span class="s2">&quot;406 M&quot;</span><span class="p">,</span>
- <span class="s1">&#39;UniLM&#39;</span><span class="p">:</span> <span class="s2">&quot;340 M&quot;</span><span class="p">,</span>
- <span class="s1">&#39;BertSumABS&#39;</span><span class="p">:</span> <span class="s2">&quot;220 M&quot;</span><span class="p">,</span>
- <span class="s1">&#39;T5-base&#39;</span><span class="p">:</span> <span class="s2">&quot;770 M&quot;</span><span class="p">,</span>
- <span class="s1">&#39;T5-11B&#39;</span><span class="p">:</span> <span class="s2">&quot;11 B&quot;</span><span class="p">,</span>
- <span class="s1">&#39;TransformerAbs&#39;</span><span class="p">:</span> <span class="s2">&quot;200M&quot;</span><span class="p">}</span>
-    <span class="p">))</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;rouge2&#39;</span><span class="p">)</span>
-
-<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Pretraining&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;Encoder&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;Seq2Seq&#39;</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span>
-<span class="n">df</span><span class="o">.</span><span class="n">rename_axis</span><span class="p">(</span><span class="s1">&#39;Model&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;model_size&#39;</span><span class="p">:</span> <span class="s1">&#39;Model Size&#39;</span><span class="p">,</span> <span class="s1">&#39;rouge2&#39;</span><span class="p">:</span> <span class="s1">&#39;Rouge-2&#39;</span><span class="p">})</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-</p>
-    </details>
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-
-<div class="output_html rendered_html output_subarea output_execute_result">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Rouge-2</th>
-      <th>Model Size</th>
-      <th>Pretraining</th>
-    </tr>
-    <tr>
-      <th>Model</th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>PT-Gen (not seq2seq)</th>
-      <td>17.28</td>
-      <td>22 M</td>
-      <td>None</td>
-    </tr>
-    <tr>
-      <th>TransformerAbs</th>
-      <td>17.76</td>
-      <td>200M</td>
-      <td>None</td>
-    </tr>
-    <tr>
-      <th>BertSumABS</th>
-      <td>19.39</td>
-      <td>220 M</td>
-      <td>Encoder</td>
-    </tr>
-    <tr>
-      <th>UniLM</th>
-      <td>20.30</td>
-      <td>340 M</td>
-      <td>Seq2Seq</td>
-    </tr>
-    <tr>
-      <th>T5-base</th>
-      <td>20.34</td>
-      <td>770 M</td>
-      <td>Seq2Seq</td>
-    </tr>
-    <tr>
-      <th>Bart</th>
-      <td>21.28</td>
-      <td>406 M</td>
-      <td>Seq2Seq</td>
-    </tr>
-    <tr>
-      <th>T5-11B</th>
-      <td>21.55</td>
-      <td>11 B</td>
-      <td>Seq2Seq</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-    
-
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><div class="flash">
-    <svg class="octicon octicon-info" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
-    <strong>Note: </strong><code>BertSumABS</code> (from <a href="https://arxiv.org/abs/1908.08345"><em>Text Summarization with Pretrained Encoders</em></a>, uses a Seq2Seq architecture but doesn&#8217;t pretrain the decoder. <code>TransformerAbs</code>, from the same paper, uses a slightly smaller model and no pretraining. <code>PT-Gen</code> is from <a href="https://arxiv.org/pdf/1704.04368.pdf">Get To The Point: Summarization with Pointer-Generator Networks</a>
-</div></p>
+<table>
+<thead><tr>
+<th style="text-align:left"></th>
+<th style="text-align:right">rouge2</th>
+<th style="text-align:left">model_size</th>
+<th style="text-align:left">Pretraining</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">PT-Gen (not seq2seq)</td>
+<td style="text-align:right">17.28</td>
+<td style="text-align:left">22 M</td>
+<td style="text-align:left">None</td>
+</tr>
+<tr>
+<td style="text-align:left">TransformerAbs</td>
+<td style="text-align:right">17.76</td>
+<td style="text-align:left">200M</td>
+<td style="text-align:left">None</td>
+</tr>
+<tr>
+<td style="text-align:left">BertSumABS</td>
+<td style="text-align:right">19.39</td>
+<td style="text-align:left">220 M</td>
+<td style="text-align:left">Encoder</td>
+</tr>
+<tr>
+<td style="text-align:left">UniLM</td>
+<td style="text-align:right">20.3</td>
+<td style="text-align:left">340 M</td>
+<td style="text-align:left">Seq2Seq</td>
+</tr>
+<tr>
+<td style="text-align:left">T5-base</td>
+<td style="text-align:right">20.34</td>
+<td style="text-align:left">770 M</td>
+<td style="text-align:left">Seq2Seq</td>
+</tr>
+<tr>
+<td style="text-align:left">Bart</td>
+<td style="text-align:right">21.28</td>
+<td style="text-align:left">406 M</td>
+<td style="text-align:left">Seq2Seq</td>
+</tr>
+<tr>
+<td style="text-align:left">T5-11B</td>
+<td style="text-align:right">21.55</td>
+<td style="text-align:left">11 B</td>
+<td style="text-align:left">Seq2Seq</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><code>BertSumABS</code> (from <a href="https://arxiv.org/abs/1908.08345"><em>Text Summarization with Pretrained Encoders</em></a>, uses a Seq2Seq architecture but doesn't pretrain the decoder. <code>TransformerAbs</code>, from the same paper, uses a slightly smaller model and no pretraining. <code>PT-Gen</code> is from <a href="https://arxiv.org/pdf/1704.04368.pdf">Get To The Point: Summarization with Pointer-Generator Networks</a></p>
 
 </div>
 </div>
