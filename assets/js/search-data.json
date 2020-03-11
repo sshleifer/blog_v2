@@ -4,9 +4,9 @@
         "post0": {
             "title": "Title",
             "content": "cd ~/transformers_fork/examples/summarization/ . /Users/shleifer/transformers_fork/examples/summarization . ls . __init__.py bart/ bertabs/ . cd bertabs . /Users/shleifer/transformers_fork/examples/summarization/bertabs . ls . README.md __init__.py configuration_bertabs.py convert_bertabs_original_pytorch_checkpoint.py modeling_bertabs.py requirements.txt run_summarization.py test_utils_summarization.py utils_summarization.py . from modeling_bertabs import * . model = BertAbs.from_pretrained(&quot;bertabs-finetuned-cnndm&quot;) . .",
-            "url": "https://sshleifer.github.io/blog_v2/2020/03/09/bert_abs.count.html",
-            "relUrl": "/2020/03/09/bert_abs.count.html",
-            "date": " • Mar 9, 2020"
+            "url": "https://sshleifer.github.io/blog_v2/2020/03/10/bert_abs.count.html",
+            "relUrl": "/2020/03/10/bert_abs.count.html",
+            "date": " • Mar 10, 2020"
         }
         
     
