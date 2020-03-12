@@ -9,16 +9,16 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers" />
 <meta property="og:description" content="Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers" />
-<link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html" />
-<meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html" />
+<link rel="canonical" href="https://sshleifer.github.io/tensorgoose/jupyter/2020/03/12/bart.html" />
+<meta property="og:url" content="https://sshleifer.github.io/tensorgoose/jupyter/2020/03/12/bart.html" />
 <meta property="og:site_name" content="TensorGoose" />
-<meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/chart-preview.png" />
+<meta property="og:image" content="https://sshleifer.github.io/tensorgoose/images/chart-preview.png" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2020-03-12T00:00:00-05:00" />
 <script type="application/ld+json">
-{"datePublished":"2020-03-12T00:00:00-05:00","headline":"Introducing BART","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html","dateModified":"2020-03-12T00:00:00-05:00","@context":"https://schema.org"}</script>
+{"datePublished":"2020-03-12T00:00:00-05:00","headline":"Introducing BART","image":"https://sshleifer.github.io/tensorgoose/images/chart-preview.png","description":"Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/tensorgoose/jupyter/2020/03/12/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/tensorgoose/jupyter/2020/03/12/bart.html","dateModified":"2020-03-12T00:00:00-05:00","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
-<link rel="stylesheet" href="/blog_v2/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/blog_v2/feed.xml" title="TensorGoose" /><script async src="https://www.googletagmanager.com/gtag/js?id=UA-160410879-1"></script>
+<link rel="stylesheet" href="/tensorgoose/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/tensorgoose/feed.xml" title="TensorGoose" /><script async src="https://www.googletagmanager.com/gtag/js?id=UA-160410879-1"></script>
 <script>
   window['ga-disable-UA-160410879-1'] = window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1";
   window.dataLayer = window.dataLayer || [];
@@ -27,25 +27,25 @@
 
   gtag('config', 'UA-160410879-1');
 </script>
-<link rel="shortcut icon" type="image/x-icon" href="/blog_v2/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<link rel="shortcut icon" type="image/x-icon" href="/tensorgoose/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
 <title>Introducing BART | TensorGoose</title>
 <meta name="generator" content="Jekyll v4.0.0" />
 <meta property="og:title" content="Introducing BART" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers" />
 <meta property="og:description" content="Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers" />
-<link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html" />
-<meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html" />
+<link rel="canonical" href="https://sshleifer.github.io/tensorgoose/jupyter/2020/03/12/bart.html" />
+<meta property="og:url" content="https://sshleifer.github.io/tensorgoose/jupyter/2020/03/12/bart.html" />
 <meta property="og:site_name" content="TensorGoose" />
-<meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/chart-preview.png" />
+<meta property="og:image" content="https://sshleifer.github.io/tensorgoose/images/chart-preview.png" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2020-03-12T00:00:00-05:00" />
 <script type="application/ld+json">
-{"datePublished":"2020-03-12T00:00:00-05:00","headline":"Introducing BART","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html","dateModified":"2020-03-12T00:00:00-05:00","@context":"https://schema.org"}</script>
+{"datePublished":"2020-03-12T00:00:00-05:00","headline":"Introducing BART","image":"https://sshleifer.github.io/tensorgoose/images/chart-preview.png","description":"Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/tensorgoose/jupyter/2020/03/12/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/tensorgoose/jupyter/2020/03/12/bart.html","dateModified":"2020-03-12T00:00:00-05:00","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 <link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
-<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/blog_v2/feed.xml" title="TensorGoose" /><script async src="https://www.googletagmanager.com/gtag/js?id=UA-160410879-1"></script>
+<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/tensorgoose/feed.xml" title="TensorGoose" /><script async src="https://www.googletagmanager.com/gtag/js?id=UA-160410879-1"></script>
 <script>
   window['ga-disable-UA-160410879-1'] = window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1";
   window.dataLayer = window.dataLayer || [];
@@ -106,7 +106,7 @@ window.onload = wrap_img;
 </script>
 </head><body><header class="site-header">
 
-  <div class="wrapper"><a class="site-title" rel="author" href="/blog_v2/">TensorGoose</a><nav class="site-nav">
+  <div class="wrapper"><a class="site-title" rel="author" href="/tensorgoose/">TensorGoose</a><nav class="site-nav">
         <input type="checkbox" id="nav-trigger" class="nav-trigger" />
         <label for="nav-trigger">
           <span class="menu-icon">
@@ -116,7 +116,7 @@ window.onload = wrap_img;
           </span>
         </label>
 
-        <div class="trigger"><a class="page-link" href="/blog_v2/about/">About Me</a><a class="page-link" href="/blog_v2/search/">Search</a><a class="page-link" href="/blog_v2/categories/">Tags</a></div>
+        <div class="trigger"><a class="page-link" href="/tensorgoose/about/">About Me</a><a class="page-link" href="/tensorgoose/search/">Search</a><a class="page-link" href="/tensorgoose/categories/">Tags</a></div>
       </nav></div>
 </header>
 <main class="page-content" aria-label="Content">
@@ -137,7 +137,7 @@ window.onload = wrap_img;
     
       <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
       
-        <a class="category-tags-link" href="/blog_v2/categories/#jupyter">jupyter</a>
+        <a class="category-tags-link" href="/tensorgoose/categories/#jupyter">jupyter</a>
         
       
       </p>
@@ -149,11 +149,11 @@ window.onload = wrap_img;
           <div class="px-2">
 
     <a href="https://github.com/sshleifer/blog_v2/tree/master/_notebooks/2020-03-12-bart.ipynb" role="button">
-<img class="notebook-badge-image" src="/blog_v2/assets/badges/github.svg" alt="View On GitHub">
+<img class="notebook-badge-image" src="/tensorgoose/assets/badges/github.svg" alt="View On GitHub">
     </a>
 </div><div class="px-2">
     <a href="https://colab.research.google.com/github/sshleifer/blog_v2/blob/master/_notebooks/2020-03-12-bart.ipynb">
-        <img class="notebook-badge-image" src="/blog_v2/assets/badges/colab.svg" alt="Open In Colab"/>
+        <img class="notebook-badge-image" src="/tensorgoose/assets/badges/colab.svg" alt="Open In Colab"/>
     </a>
 </div>
         </div>
@@ -239,7 +239,7 @@ window.onload = wrap_img;
 <p><!-- ![](./bert_mac_small.jpg) -->
 <!-- ![](./diagram_bartpost_v2.jpg) -->
 <!-- ![](./bert_excel_v2.jpg) -->
-<img src="/blog_v2/images/copied_from_nb/./diagram_bert_v5.png" alt=""></p>
+<img src="/tensorgoose/images/copied_from_nb/./diagram_bert_v5.png" alt=""></p>
 <div class="footnotes">
 <hr>
 <ol>
@@ -262,7 +262,7 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><img src="/blog_v2/images/copied_from_nb/./diagram_bartpost_gpt2.jpg" alt=""></p>
+<p><img src="/tensorgoose/images/copied_from_nb/./diagram_bartpost_gpt2.jpg" alt=""></p>
 
 </div>
 </div>
@@ -275,9 +275,9 @@ window.onload = wrap_img;
 </h4>
 <p>Our new friends, like Bart, get the best of both worlds:</p>
 <p>The encoder's <code>attention_mask</code> is bidirectional, like BERT:
-<img src="/blog_v2/images/copied_from_nb/./seq2seq_enc_v5.png" alt=""></p>
+<img src="/tensorgoose/images/copied_from_nb/./seq2seq_enc_v5.png" alt=""></p>
 <p>and the decoder's <code>attention_mask</code> is causal, like GPT2:</p>
-<p><img src="/blog_v2/images/copied_from_nb/./seq2seq_dec.png" alt=""></p>
+<p><img src="/tensorgoose/images/copied_from_nb/./seq2seq_dec.png" alt=""></p>
 <!-- ![](./causal_with_prefix.jpg) -->
 
 
@@ -665,20 +665,20 @@ The Seq2Seq attention pattern is therefore well suited to summarization and othe
         theme="github-light"
         crossorigin="anonymous"
         async>
-</script><a class="u-url" href="/blog_v2/jupyter/2020/03/12/bart.html" hidden></a>
+</script><a class="u-url" href="/tensorgoose/jupyter/2020/03/12/bart.html" hidden></a>
 </article>
       </div>
     </main><footer class="site-footer h-card">
-  <data class="u-url" href="/blog_v2/"></data>
+  <data class="u-url" href="/tensorgoose/"></data>
 
   <div class="wrapper">
 
     <div class="footer-col-wrapper">
       <div class="footer-col">
         <p class="feed-subscribe">
-          <a href="/blog_v2/feed.xml">
+          <a href="/tensorgoose/feed.xml">
             <svg class="svg-icon orange">
-              <use xlink:href="/blog_v2/assets/minima-social-icons.svg#rss"></use>
+              <use xlink:href="/tensorgoose/assets/minima-social-icons.svg#rss"></use>
             </svg><span>Subscribe</span>
           </a>
         </p>
@@ -688,7 +688,7 @@ The Seq2Seq attention pattern is therefore well suited to summarization and othe
       </div>
     </div>
 
-    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/sshleifer" title="sshleifer"><svg class="svg-icon grey"><use xlink:href="/blog_v2/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/sam_shleifer" title="sam_shleifer"><svg class="svg-icon grey"><use xlink:href="/blog_v2/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/sshleifer" title="sshleifer"><svg class="svg-icon grey"><use xlink:href="/tensorgoose/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/sam_shleifer" title="sam_shleifer"><svg class="svg-icon grey"><use xlink:href="/tensorgoose/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
 </div>
 
   </div>
