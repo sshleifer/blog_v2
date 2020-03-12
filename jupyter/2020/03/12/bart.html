@@ -194,7 +194,7 @@ window.onload = wrap_img;
 <h3 id="Overview">
 <a class="anchor" href="#Overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview<a class="anchor-link" href="#Overview"> </a>
 </h3>
-<p>For the past few weeks, I worked on integrating BART into <a href="https://github.com/huggingface/transformers/">transformers</a>. This post covers the high-level differences between BART and its predecessors and how to use the new <code>BartForConditionalGeneration</code> to summarize documents. Enjoy and leave a comment below if you have any questions!</p>
+<p>For the past few weeks, I worked on integrating BART into <a href="https://github.com/huggingface/transformers/">transformers</a>. This post covers the high-level differences between BART and its predecessors and how to use the new <code>BartForConditionalGeneration</code> to summarize documents. Leave a comment below if you have any questions!</p>
 
 </div>
 </div>
@@ -207,7 +207,7 @@ window.onload = wrap_img;
 </h3>
 <p>In October 2019, teams from Google and Facebook published new transformer papers:  <a href="https://arxiv.org/abs/1910.10683">T5</a> and <a href="https://arxiv.org/abs/1910.13461">BART</a>. Both papers achieved better downstream performance on generation tasks, like abstractive summarization and dialogue, with two changes:</p>
 <ul>
-<li>replace BERT's bidirectional encoder architecture with an encoder-decoder architecture</li>
+<li>add a BERT's bidirectional encoder architecture with an encoder-decoder architecture</li>
 <li>replace BERT's fill-in-the blank cloze task with a more complicated mix of pretraining tasks.</li>
 </ul>
 <!-- **Tasks:** Historically, Seq2Seq models have been used for text generation tasks like summarization and translation. "BART is particularly effective when finetuned for text generation, but also matches the performance of RoBERTa on GLUE and SQuAD", with only 10% more parameters. -->
