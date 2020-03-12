@@ -3,38 +3,58 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
-<title>Title | TensorGoose</title>
+<title>Understanding Incremental Decoding | TensorGoose</title>
 <meta name="generator" content="Jekyll v4.0.0" />
-<meta property="og:title" content="Title" />
+<meta property="og:title" content="Understanding Incremental Decoding" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="summary" />
-<meta property="og:description" content="summary" />
-<link rel="canonical" href="https://sshleifer.github.io/blog_v2/2020/03/11/Decoding.html" />
-<meta property="og:url" content="https://sshleifer.github.io/blog_v2/2020/03/11/Decoding.html" />
+<meta name="description" content="Walks through some of the performance hacks in BartForConditionalGeneration" />
+<meta property="og:description" content="Walks through some of the performance hacks in BartForConditionalGeneration" />
+<link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html" />
+<meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html" />
 <meta property="og:site_name" content="TensorGoose" />
+<meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/chart-preview.png" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2020-03-11T00:00:00-05:00" />
 <script type="application/ld+json">
-{"datePublished":"2020-03-11T00:00:00-05:00","headline":"Title","description":"summary","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/2020/03/11/Decoding.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/2020/03/11/Decoding.html","dateModified":"2020-03-11T00:00:00-05:00","@context":"https://schema.org"}</script>
+{"datePublished":"2020-03-11T00:00:00-05:00","headline":"Understanding Incremental Decoding","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"Walks through some of the performance hacks in BartForConditionalGeneration","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html","dateModified":"2020-03-11T00:00:00-05:00","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
-<link rel="stylesheet" href="/blog_v2/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/blog_v2/feed.xml" title="TensorGoose" /><link rel="shortcut icon" type="image/x-icon" href="/blog_v2/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
-<title>Title | TensorGoose</title>
+<link rel="stylesheet" href="/blog_v2/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/blog_v2/feed.xml" title="TensorGoose" /><script async src="https://www.googletagmanager.com/gtag/js?id=UA-160410879-1"></script>
+<script>
+  window['ga-disable-UA-160410879-1'] = window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1";
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-160410879-1');
+</script>
+<link rel="shortcut icon" type="image/x-icon" href="/blog_v2/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Understanding Incremental Decoding | TensorGoose</title>
 <meta name="generator" content="Jekyll v4.0.0" />
-<meta property="og:title" content="Title" />
+<meta property="og:title" content="Understanding Incremental Decoding" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="summary" />
-<meta property="og:description" content="summary" />
-<link rel="canonical" href="https://sshleifer.github.io/blog_v2/2020/03/11/Decoding.html" />
-<meta property="og:url" content="https://sshleifer.github.io/blog_v2/2020/03/11/Decoding.html" />
+<meta name="description" content="Walks through some of the performance hacks in BartForConditionalGeneration" />
+<meta property="og:description" content="Walks through some of the performance hacks in BartForConditionalGeneration" />
+<link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html" />
+<meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html" />
 <meta property="og:site_name" content="TensorGoose" />
+<meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/chart-preview.png" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2020-03-11T00:00:00-05:00" />
 <script type="application/ld+json">
-{"datePublished":"2020-03-11T00:00:00-05:00","headline":"Title","description":"summary","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/2020/03/11/Decoding.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/2020/03/11/Decoding.html","dateModified":"2020-03-11T00:00:00-05:00","@context":"https://schema.org"}</script>
+{"datePublished":"2020-03-11T00:00:00-05:00","headline":"Understanding Incremental Decoding","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"Walks through some of the performance hacks in BartForConditionalGeneration","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html","dateModified":"2020-03-11T00:00:00-05:00","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 <link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
-<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/blog_v2/feed.xml" title="TensorGoose" />
+<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/blog_v2/feed.xml" title="TensorGoose" /><script async src="https://www.googletagmanager.com/gtag/js?id=UA-160410879-1"></script>
+<script>
+  window['ga-disable-UA-160410879-1'] = window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1";
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-160410879-1');
+</script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
     <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"> </script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
@@ -104,7 +124,7 @@ window.onload = wrap_img;
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">Title</h1><p class="page-description">summary</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-03-11T00:00:00-05:00" itemprop="datePublished">
+    <h1 class="post-title p-name" itemprop="name headline">Understanding Incremental Decoding</h1><p class="page-description">Walks through some of the performance hacks in `BartForConditionalGeneration`</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-03-11T00:00:00-05:00" itemprop="datePublished">
         Mar 11, 2020
       </time>
        • <span class="read-time" title="Estimated read time">
@@ -114,6 +134,13 @@ window.onload = wrap_img;
     
 </span></p>
 
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/blog_v2/categories/#jupyter">jupyter</a>
+        
+      
+      </p>
     
 
     
@@ -133,7 +160,9 @@ window.onload = wrap_img;
       </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <!--
+    <ul class="section-nav">
+<li class="toc-entry toc-h3"><a href="#Partially-caching-keys-and-values-in-DecoderLayer">Partially caching keys and values in DecoderLayer </a></li>
+</ul><!--
 #################################################
 ### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
 #################################################
@@ -149,21 +178,8 @@ window.onload = wrap_img;
 </div>
     
 
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Understanding-Incremental-Decoding">Understanding Incremental Decoding<a class="anchor-link" href="#Understanding-Incremental-Decoding"> </a></h2><blockquote><p>Walks through some of the performance hacks in <code>BartForConditionalGeneration</code></p>
-</blockquote>
-<ul>
-<li>toc: true - badges: true</li>
-<li>comments: true</li>
-<li>categories: [jupyter]</li>
-<li>image: images/chart-preview.png</li>
-</ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Here is a really slow (pseudocode) way to greedily generate summaries:</p>
 <div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">bos</span><span class="p">]</span>
@@ -178,7 +194,8 @@ window.onload = wrap_img;
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Let's say <code>N = len(article_input_ids)</code> and <code>M = len(output_tokens)</code> when we return. Let's also ignore the cost of encoder-decoder attention.
 Then the complexity of this approach is roughly</p>
@@ -191,7 +208,8 @@ Then the complexity of this approach is roughly</p>
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Let's say we are generating a 100 token summary of a 1024 token article, then we have to "process"
 $N \cdot M  + \frac{M(M+1)}{2} =  107,450$ tokens</p>
@@ -204,7 +222,8 @@ $N \cdot M  + \frac{M(M+1)}{2} =  107,450$ tokens</p>
 <div class="cell border-box-sizing code_cell rendered">
 <details class="description">
       <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
-        <p><div class="input">
+        <p></p>
+<div class="input">
 
 <div class="inner_cell">
     <div class="input_area">
@@ -212,19 +231,20 @@ $N \cdot M  + \frac{M(M+1)}{2} =  107,450$ tokens</p>
 <span class="c1"># show work</span>
 <span class="n">N</span><span class="p">,</span><span class="n">M</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">100</span>
 <span class="n">complexity_simple</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">*</span><span class="n">M</span> <span class="o">+</span> <span class="p">((</span><span class="n">M</span><span class="o">*</span><span class="p">(</span><span class="n">M</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
-<span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;To generate a 100 token summary of a 1024 token article using this approach, we have to process </span><span class="si">{:,}</span><span class="s2"> tokens.&quot;</span>
+<span class="n">msg</span> <span class="o">=</span> <span class="s2">"To generate a 100 token summary of a 1024 token article using this approach, we have to process </span><span class="si">{:,}</span><span class="s2"> tokens."</span>
 <span class="c1">#display(Markdown(msg.format(complexity_simple)))</span>
 </pre></div>
 
     </div>
 </div>
 </div>
-</p>
+
     </details>
 </div>
     
 
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Thankfully, we can just hoist the <code>encoder</code> call outside the loop!</p>
 <div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">bos</span><span class="p">]</span>
@@ -240,14 +260,16 @@ $N \cdot M  + \frac{M(M+1)}{2} =  107,450$ tokens</p>
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Now the complexity is dramatically reduced: $N \cdot 1  + \frac{M(M+1)}{2} = 6,074$</p>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>But we can  go even further, and partially cache the attention outputs for the decoder.
 This will change our generation loop to:</p>
@@ -266,9 +288,13 @@ This will change our generation loop to:</p>
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Partially-caching-keys-and-values-in-DecoderLayer">Partially caching keys and values in DecoderLayer<a class="anchor-link" href="#Partially-caching-keys-and-values-in-DecoderLayer"> </a></h3><p>Here is some pseudocode for attention without all the reshapes and heads and masks and scaling. It doesn't work even though it looks pretty.</p>
+<h3 id="Partially-caching-keys-and-values-in-DecoderLayer">
+<a class="anchor" href="#Partially-caching-keys-and-values-in-DecoderLayer" aria-hidden="true"><span class="octicon octicon-link"></span></a>Partially caching keys and values in DecoderLayer<a class="anchor-link" href="#Partially-caching-keys-and-values-in-DecoderLayer"> </a>
+</h3>
+<p>Here is some pseudocode for attention without all the reshapes and heads and masks and scaling. It doesn't work even though it looks pretty.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SimplifiedAttention</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Wq</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
@@ -312,8 +338,8 @@ This will change our generation loop to:</p>
 </ul>
 <p>The more exciting optimization is that in <code>self_attn</code>, we can cache the part of k,v that depends on 
 <code>x[:, :1]</code> the tokens we've already generated. Then each time through the generation loop, we only pass in <code>x[:, :-1]</code> and apply concatenation:</p>
-<div class="highlight"><pre><span></span><span class="n">k</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">past_key</span><span class="p">,</span> <span class="n">new_k</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;seq_len&#39;</span><span class="p">)</span> <span class="c1"># the seq_len dimension, </span>
-<span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">past_value</span><span class="p">,</span> <span class="n">new_v</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;seq_len&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="n">k</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">past_key</span><span class="p">,</span> <span class="n">new_k</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="s1">'seq_len'</span><span class="p">)</span> <span class="c1"># the seq_len dimension, </span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">past_value</span><span class="p">,</span> <span class="n">new_v</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="s1">'seq_len'</span><span class="p">)</span>
 </pre></div>
 <p>Of the 8 <code>F.linear</code> ops performed by each <code>DecoderLayer</code>, we've managed to completely cache 2 of them, and almost completely cache 2 more. Overall, we chop off about 40% of the runtime vs only caching encoder_outputs.</p>
 
@@ -324,7 +350,15 @@ This will change our generation loop to:</p>
 
 
 
-  </div><a class="u-url" href="/blog_v2/2020/03/11/Decoding.html" hidden></a>
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="sshleifer/blog_v2"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/blog_v2/jupyter/2020/03/11/Decoding.html" hidden></a>
 </article>
       </div>
     </main><footer class="site-footer h-card">
