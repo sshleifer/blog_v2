@@ -9,14 +9,14 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers" />
 <meta property="og:description" content="Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers" />
-<link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html" />
-<meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html" />
+<link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html" />
+<meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html" />
 <meta property="og:site_name" content="TensorGoose" />
 <meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/chart-preview.png" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2020-03-06T00:00:00-06:00" />
+<meta property="article:published_time" content="2020-03-11T00:00:00-05:00" />
 <script type="application/ld+json">
-{"datePublished":"2020-03-06T00:00:00-06:00","headline":"Introducing BART","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html","dateModified":"2020-03-06T00:00:00-06:00","@context":"https://schema.org"}</script>
+{"datePublished":"2020-03-11T00:00:00-05:00","headline":"Introducing BART","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html","dateModified":"2020-03-11T00:00:00-05:00","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/blog_v2/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/blog_v2/feed.xml" title="TensorGoose" /><link rel="shortcut icon" type="image/x-icon" href="/blog_v2/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
 <title>Introducing BART | TensorGoose</title>
@@ -25,14 +25,14 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers" />
 <meta property="og:description" content="Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers" />
-<link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html" />
-<meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html" />
+<link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html" />
+<meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html" />
 <meta property="og:site_name" content="TensorGoose" />
 <meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/chart-preview.png" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2020-03-06T00:00:00-06:00" />
+<meta property="article:published_time" content="2020-03-11T00:00:00-05:00" />
 <script type="application/ld+json">
-{"datePublished":"2020-03-06T00:00:00-06:00","headline":"Introducing BART","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/06/bart.html","dateModified":"2020-03-06T00:00:00-06:00","@context":"https://schema.org"}</script>
+{"datePublished":"2020-03-11T00:00:00-05:00","headline":"Introducing BART","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/11/Decoding.html","dateModified":"2020-03-11T00:00:00-05:00","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 <link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
@@ -106,13 +106,13 @@ window.onload = wrap_img;
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">Introducing BART</h1><p class="page-description">Episode 1 -- a strange new Seq2Seq model with state of the art summarization performance comes to transfomers</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-03-06T00:00:00-06:00" itemprop="datePublished">
-        Mar 6, 2020
+    <h1 class="post-title p-name" itemprop="name headline">Introducing BART</h1><p class="page-description">Episode 1 -- a strange new Seq2Seq model with state of the art summarization performance comes to transfomers</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-03-11T00:00:00-05:00" itemprop="datePublished">
+        Mar 11, 2020
       </time>
        • <span class="read-time" title="Estimated read time">
     
     
-      11 min read
+      14 min read
     
 </span></p>
 
@@ -130,11 +130,11 @@ window.onload = wrap_img;
         <div class="pb-5 d-flex flex-wrap flex-justify-end">
           <div class="px-2">
 
-    <a href="https://github.com/sshleifer/blog_v2/tree/master/_notebooks/2020-03-06-bart.ipynb" role="button">
+    <a href="https://github.com/sshleifer/blog_v2/tree/master/_notebooks/2020-03-11-Decoding.ipynb" role="button">
 <img class="notebook-badge-image" src="/blog_v2/assets/badges/github.svg" alt="View On GitHub">
     </a>
 </div><div class="px-2">
-    <a href="https://colab.research.google.com/github/sshleifer/blog_v2/blob/master/_notebooks/2020-03-06-bart.ipynb">
+    <a href="https://colab.research.google.com/github/sshleifer/blog_v2/blob/master/_notebooks/2020-03-11-Decoding.ipynb">
         <img class="notebook-badge-image" src="/blog_v2/assets/badges/colab.svg" alt="Open In Colab"/>
     </a>
 </div>
@@ -152,12 +152,14 @@ window.onload = wrap_img;
 </li>
 <li class="toc-entry toc-h3"><a href="#Summarization">Summarization </a></li>
 <li class="toc-entry toc-h3"><a href="#BartForConditionalGeneration">BartForConditionalGeneration </a></li>
+<li class="toc-entry toc-h2"><a href="#Incremental-Decoding">Incremental Decoding </a></li>
 <li class="toc-entry toc-h2"><a href="#Conclusion">Conclusion </a></li>
+<li class="toc-entry toc-h2"><a href="#Bonus:-Partially-caching-k-and-v-in-DecoderLayer">Bonus: Partially caching k and v in DecoderLayer </a></li>
 </ul><!--
 #################################################
 ### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
 #################################################
-# file to edit: _notebooks/2020-03-06-bart.ipynb
+# file to edit: _notebooks/2020-03-11-Decoding.ipynb
 -->
 
 <div class="container" id="notebook-container">
@@ -175,7 +177,7 @@ window.onload = wrap_img;
 <h3 id="Overview">
 <a class="anchor" href="#Overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview<a class="anchor-link" href="#Overview"> </a>
 </h3>
-<p>For the past few weeks, I worked on integrating BART into <a href="https://github.com/huggingface/transformers/">transformers</a>. This post covers the high-level differences between BART and its predecessors and how to use  new <code>BartForConditionalGeneration</code> to summarize documents. Enjoy and leave a comment below if you have any questions!</p>
+<p>For the past few weeks, I worked on integrating BART into <a href="https://github.com/huggingface/transformers/">transformers</a>. This post covers the high-level differences between BART and its predecessors, how to use  new <code>BartForConditionalGeneration</code> to summarize documents, and a few interesting engineering tricks that accelerate generation.</p>
 
 </div>
 </div>
@@ -186,11 +188,7 @@ window.onload = wrap_img;
 <h3 id="Background:-Seq2Seq-Pretraining">
 <a class="anchor" href="#Background:-Seq2Seq-Pretraining" aria-hidden="true"><span class="octicon octicon-link"></span></a>Background: Seq2Seq Pretraining<a class="anchor-link" href="#Background:-Seq2Seq-Pretraining"> </a>
 </h3>
-<p>In October 2019, teams from Microsoft, Google and Facebook independently published three new transformer papers: <a href="https://arxiv.org/abs/1905.03197">UniLM</a>, <a href="https://arxiv.org/abs/1910.10683">T5</a> and <a href="https://arxiv.org/abs/1910.13461">BART</a>. All three papers found that they achieve better downstream performance on generation tasks, like translation and summarization, if they make two changes:</p>
-<ul>
-<li>replace BERT's bidirectional encoder architecture with an encoder-decoder architecture</li>
-<li>replace BERT's fill-in-the blank cloze task with a more complicated mix of pretraining tasks.</li>
-</ul>
+<p>In October 2019, teams from Microsoft, Google and Facebook independently published three new transformer papers: <a href="https://arxiv.org/abs/1905.03197">UniLM</a>, <a href="https://arxiv.org/abs/1910.10683">T5</a> and <a href="https://arxiv.org/abs/1910.13461">BART</a>. All three papers found that they achieve better downstream performance on generation tasks, like translation and summarization, if they (a) replace BERT's bidirectional architecture with a Seq2Seq architecture and (b) BERT's fill-in-the blank  cloze task with a more complicated mix of pretraining tasks.</p>
 <!-- **Tasks:** Historically, Seq2Seq models have been used for text generation tasks like summarization and translation. "BART is particularly effective when finetuned for text generation, but also matches the performance of RoBERTa on GLUE and SQuAD", with only 10% more parameters. -->
 </div>
 </div>
@@ -643,11 +641,197 @@ The Seq2Seq attention pattern is therefore well suited to summarization and othe
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>Now that we have a high level understanding of Bart, lets finish by zooming in on some engineering tricks that make generation faster.
+Warning: The following has a heavier engineering focus than the rest of the post</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Incremental-Decoding">
+<a class="anchor" href="#Incremental-Decoding" aria-hidden="true"><span class="octicon octicon-link"></span></a>Incremental Decoding<a class="anchor-link" href="#Incremental-Decoding"> </a>
+</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here is a really slow (pseudocode) way to greedily generate summaries:</p>
+<div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">bos</span><span class="p">]</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+     <span class="n">encoder_hidden_state</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">)</span>
+     <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">encoder_hidden_state</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">)</span>
+     <span class="n">next_word</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+     <span class="n">output_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_word</span><span class="p">)</span>
+     <span class="k">if</span> <span class="n">next_word</span> <span class="o">==</span> <span class="n">eos</span><span class="p">:</span> <span class="k">break</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's say <code>N = len(article_input_ids)</code> and <code>M = len(output_tokens)</code> when we return. Let's also ignore the cost of encoder-decoder attention.
+Then the complexity of this approach is roughly</p>
+<ul>
+<li>$(N \cdot M)$ (we call the encoder <code>M</code> times on <code>N</code> tokens)</li>
+<li>$+ \sum_{m=1}^{M} m = \frac{M(M+1)}{2}$   (we call the decoder <code>M</code> times on 1 token then 2 tokens, all the way to M tokens).</li>
+<li>Total: $N \cdot M  + \frac{M(M+1)}{2}$</li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's say we are generating a 100 token summary of a 1024 token article, then we have to "process"
+$N \cdot M  + \frac{M(M+1)}{2} =  107,450$ tokens</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#collapse-hide</span>
+<span class="c1"># show work</span>
+<span class="n">N</span><span class="p">,</span><span class="n">M</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">100</span>
+<span class="n">complexity_simple</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">*</span><span class="n">M</span> <span class="o">+</span> <span class="p">((</span><span class="n">M</span><span class="o">*</span><span class="p">(</span><span class="n">M</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">msg</span> <span class="o">=</span> <span class="s2">"To generate a 100 token summary of a 1024 token article using this approach, we have to process </span><span class="si">{:,}</span><span class="s2"> tokens."</span>
+<span class="c1">#display(Markdown(msg.format(complexity_simple)))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Thankfully, we can just hoist the <code>encoder</code> call outside the loop!</p>
+<div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">bos</span><span class="p">]</span>
+<span class="n">encoder_hidden_state</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">)</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+     <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">encoder_hidden_state</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">)</span>
+     <span class="n">next_word</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+
+     <span class="n">output_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_word</span><span class="p">)</span>
+     <span class="k">if</span> <span class="n">next_word</span> <span class="o">==</span> <span class="n">eos</span><span class="p">:</span> <span class="k">break</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now the complexity is dramatically reduced: $N \cdot 1  + \frac{M(M+1)}{2} = 6,074$</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>But we can  go even further, and partially cache the attention outputs for the decoder.
+This will change our generation loop to:</p>
+<div class="highlight"><pre><span></span><span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">bos</span><span class="p">]</span>
+<span class="n">encoder_hidden_state</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">article_input_ids</span><span class="p">)</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+     <span class="n">logits</span><span class="p">,</span> <span class="n">cache</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">encoder_hidden_state</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">)</span>
+     <span class="n">next_word</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+     <span class="n">output_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_word</span><span class="p">)</span>
+     <span class="k">if</span> <span class="n">next_word</span> <span class="o">==</span> <span class="n">eos</span><span class="p">:</span> <span class="k">break</span>
+</pre></div>
+<p>And change our formula to $N + M = 1,124$</p>
+<p>The nitty-gritty of this trick is explained in the Bonus section below.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Conclusion">
 <a class="anchor" href="#Conclusion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusion<a class="anchor-link" href="#Conclusion"> </a>
 </h2>
 <p>Our first release of <code>BartModel</code> prioritized moving quickly and keeping the code simple, but it's still a work in progress. I am currently working on making the implementation in transformers as fast and memory-efficient as the original implementation. Stay tuned for episode 2 of this series, where we try to close the gap.</p>
 <p>A big thank you to Sasha Rush and Patrick Von Platten for reading many versions of this post, and to the Bart authors for releasing their code and answering questions on Github.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Bonus:-Partially-caching-k-and-v-in-DecoderLayer">
+<a class="anchor" href="#Bonus:-Partially-caching-k-and-v-in-DecoderLayer" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bonus: Partially caching k and v in <code>DecoderLayer</code><a class="anchor-link" href="#Bonus:-Partially-caching-k-and-v-in-DecoderLayer"> </a>
+</h2>
+<p>Here is some pseudocode for attention without all the reshapes and heads and masks and scaling.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SimplifiedAttention</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Wq</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Wk</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Wv</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dense</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wq</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wk</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> 
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wv</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">matmul_qk</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">attention_weights</span> <span class="o">=</span> <span class="n">matmul_qk</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">attention_weights</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+</pre></div>
+<p>Now lets glimpse at the callers inside bart's <code>DecoderLayer</code>:
+(LayerNorms and dropouts deleted for simplicity). Here's some more pseudocode</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SimplifiedDecoderLayer</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">self_attn</span> <span class="o">=</span> <span class="n">SimplifiedAttention</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder_attn</span> <span class="o">=</span> <span class="n">SimplifiedAttention</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">last_encoder_hidden_state</span><span class="p">,</span> <span class="o">*</span><span class="n">masks_etc</span><span class="p">):</span>
+         <span class="c1"># x shape `(batch_size, tokens_generated_so_far, embed_dim)`</span>
+         <span class="c1"># x comes from decoder</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_attn</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">x</span><span class="p">)</span> <span class="c1"># pay attention to somebody else for a change!</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder_attn</span><span class="p">(</span>
+            <span class="n">query</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="n">last_encoder_hidden_state</span><span class="p">,</span>  <span class="c1"># could be None</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">last_encoder_hidden_state</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span>
+</pre></div>
+<p>What did we learn?</p>
+<ul>
+<li>In <code>encoder_attention</code>, we can cache everything that doesn't depend on q, namely these outputs
+<pre><code>      k = self.Wk(k) 
+      v = self.Wv(v)</code></pre>
+</li>
+</ul>
+<p>The more exciting optimization is that in <code>self_attn</code>, we can cache the part of k,v that depends on 
+<code>x[:, :1]</code> the tokens we've already generated. Then each time through the generation loop, we only pass in <code>x[:, :-1]</code> and apply concatenation:</p>
+<div class="highlight"><pre><span></span><span class="n">k</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">past_key</span><span class="p">,</span> <span class="n">new_k</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="s1">'seq_len'</span><span class="p">)</span> <span class="c1"># the seq_len dimension, </span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">past_value</span><span class="p">,</span> <span class="n">new_v</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="s1">'seq_len'</span><span class="p">)</span>
+</pre></div>
+<p>Of the 8 <code>F.linear</code> ops performed by each DecoderLayer was doing, we've managed to completely cache 2 of them, and almost completely cache 2 more. Overall, we chop off about 40% of the runtime vs only caching encoder_outputs.</p>
 
 </div>
 </div>
@@ -664,7 +848,7 @@ The Seq2Seq attention pattern is therefore well suited to summarization and othe
         theme="github-light"
         crossorigin="anonymous"
         async>
-</script><a class="u-url" href="/blog_v2/jupyter/2020/03/06/bart.html" hidden></a>
+</script><a class="u-url" href="/blog_v2/jupyter/2020/03/11/Decoding.html" hidden></a>
 </article>
       </div>
     </main><footer class="site-footer h-card">
