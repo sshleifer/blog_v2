@@ -433,7 +433,7 @@ Seq2Seq archictectures can be directly finetuned on summarization tasks, without
 <span class="s2">Bart will be released through pip in v 3.0.0, until then use it by installing from source:</span>
 
 <span class="s2">git clone git@github.com:huggingface/transformers.git</span>
-<span class="s2">git checkout 2e81b9d8</span>
+<span class="s2">git checkout d6de6423</span>
 <span class="s2">cd transformers</span>
 <span class="s2">pip install -e ".[dev]"</span>
 
@@ -548,10 +548,8 @@ Seq2Seq archictectures can be directly finetuned on summarization tasks, without
                              <span class="n">num_beams</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                              <span class="n">length_penalty</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
                              <span class="n">max_length</span><span class="o">=</span><span class="mi">142</span><span class="p">,</span>
-                             <span class="n">min_length</span><span class="o">=</span><span class="mi">56</span><span class="p">,</span>
-                             <span class="n">no_repeat_ngram_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-                             <span class="n">early_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                             <span class="n">do_sample</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                             <span class="n">min_len</span><span class="o">=</span><span class="mi">56</span><span class="p">,</span>
+                             <span class="n">no_repeat_ngram_size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="n">summary_txt</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">summary_ids</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="s1">'&gt; **Summary: **'</span><span class="o">+</span><span class="n">summary_txt</span><span class="p">))</span>
