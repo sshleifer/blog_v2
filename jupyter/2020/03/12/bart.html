@@ -166,11 +166,11 @@ window.onload = wrap_img;
 <ul>
 <li class="toc-entry toc-h4"><a href="#Bert-vs.-GPT2">Bert vs. GPT2 </a></li>
 <li class="toc-entry toc-h4"><a href="#Encoder-Decoder">Encoder-Decoder </a></li>
-<li class="toc-entry toc-h4"><a href="#Pretraining-Task">Pretraining Task </a></li>
+<li class="toc-entry toc-h4"><a href="#Pretraining:-Fill-In-the-Span">Pretraining: Fill In the Span </a></li>
 </ul>
 </li>
 <li class="toc-entry toc-h3"><a href="#Summarization">Summarization </a></li>
-<li class="toc-entry toc-h3"><a href="#BartForConditionalGeneration">BartForConditionalGeneration </a></li>
+<li class="toc-entry toc-h3"><a href="#BartForConditionalGeneration-Demo">BartForConditionalGeneration Demo </a></li>
 <li class="toc-entry toc-h2"><a href="#Conclusion">Conclusion </a></li>
 </ul><!--
 #################################################
@@ -302,10 +302,10 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Pretraining-Task">
-<a class="anchor" href="#Pretraining-Task" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pretraining Task<a class="anchor-link" href="#Pretraining-Task"> </a>
+<h4 id="Pretraining:-Fill-In-the-Span">
+<a class="anchor" href="#Pretraining:-Fill-In-the-Span" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pretraining: Fill In the Span<a class="anchor-link" href="#Pretraining:-Fill-In-the-Span"> </a>
 </h4>
-<p>Bart and T5 are both pretrained on tasks where <strong>spans</strong> of text are replaced by masked tokens, and the model must learn to reconstruct the original document. Figure 1 from the BART paper explains it well:</p>
+<p>Bart and T5 are both pretrained on tasks where <strong>spans</strong> of text are replaced by masked tokens. The model must learn to reconstruct the original document. Figure 1 from the BART paper explains it well:</p>
 <p><img src="/blog_v2/images/copied_from_nb/./text_infilling.png" alt="">
 In this example, the original document is A B C D E. the span <code>[C, D]</code> is masked before encoding and an extra mask is inserted before B, leaving the corrupted document <code>'A _ B _ E'</code> as input to the encoder.</p>
 <p>The decoder (autogressive means "uses a causal mask") must reconstruct the original document, using the encoder's output and previous uncorrupted tokens.</p>
@@ -325,8 +325,8 @@ In this example, the original document is A B C D E. the span <code>[C, D]</code
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Now, we apply this Seq2Seq method to summarization, where the <code>input</code> sequence is the document we want to summarize, and the <code>output</code> sequence is a ground truth summary.
-The Seq2Seq attention pattern is therefore well suited to summarization and other conditional generation tasks. Seq2Seq models are allowed to attend to the whole <code>input</code> document, but, as they generate a summary, they can only consider what they've already generated. The numbers confirm this: all the new fancy Seq2Seq models do a lot better than the old less-fancy guys on the CNN/Daily Mail abstractive summarization task, and Bart does especially well.</p>
+<p>In summarization tasks, the <code>input</code> sequence is the document we want to summarize, and the <code>output</code> sequence is a ground truth summary.
+The Seq2Seq attention pattern is therefore well suited to summarization and other conditional generation tasks, because Seq2Seq models are allowed to attend to the whole <code>input</code> document, but, as they generate a summary, they can only consider what they've already generated. The numbers confirm this: all the new fancy Seq2Seq models do a lot better than the old less-fancy guys on the CNN/Daily Mail abstractive summarization task, and Bart does especially well.</p>
 
 </div>
 </div>
@@ -411,16 +411,9 @@ The Seq2Seq attention pattern is therefore well suited to summarization and othe
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="BartForConditionalGeneration">
-<a class="anchor" href="#BartForConditionalGeneration" aria-hidden="true"><span class="octicon octicon-link"></span></a><code>BartForConditionalGeneration</code><a class="anchor-link" href="#BartForConditionalGeneration"> </a>
+<h3 id="BartForConditionalGeneration-Demo">
+<a class="anchor" href="#BartForConditionalGeneration-Demo" aria-hidden="true"><span class="octicon octicon-link"></span></a>BartForConditionalGeneration Demo<a class="anchor-link" href="#BartForConditionalGeneration-Demo"> </a>
 </h3>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<!-- Bart uses a "novel pretraining task", called Text Infilling which is only possible with a Seq2Seq architecture. For this task, **span** of text is replaced with a single `<mask>` token. This span can be of any length, forcing the model to learn how many tokens to generate. -->
 </div>
 </div>
 </div>
