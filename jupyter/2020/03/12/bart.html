@@ -170,7 +170,7 @@ window.onload = wrap_img;
 </ul>
 </li>
 <li class="toc-entry toc-h3"><a href="#Summarization">Summarization </a></li>
-<li class="toc-entry toc-h3"><a href="#BartForConditionalGeneration-Demo">BartForConditionalGeneration Demo </a></li>
+<li class="toc-entry toc-h3"><a href="#Demo:-BartForConditionalGeneration">Demo: BartForConditionalGeneration </a></li>
 <li class="toc-entry toc-h2"><a href="#Conclusion">Conclusion </a></li>
 </ul><!--
 #################################################
@@ -236,7 +236,7 @@ window.onload = wrap_img;
 <p>In code, the idea of "what information can be used use when predicting the token at position <code>i</code>" is controlled by an argument called <code>attention_mask</code><sup class="footnote-ref" id="fnref-2"><a href="#fn-2">1</a></sup>. A value of 1 in the attention mask means that the model can use information for the column's word when predicting the row's word.</p>
 <!-- > Note: In this post, we show attention masks in grids where each row `y` represents an output token, and each column `x` represents an input token. If the square at `(y3, x4)` is black. It means that our prediction for `y3` is allowed to utilize information from `x4`. During pretraining, `x` would be the corrupted document, and `y` would be the original. -->
 
-<p>Here is Bert's "Fully-visible" <code>attention_mask</code>:</p>
+<p>Here is Bert's "Fully-visible"<sup class="footnote-ref" id="fnref-3"><a href="#fn-3">2</a></sup> <code>attention_mask</code>:</p>
 <p><!-- ![](./bert_mac_small.jpg) -->
 <!-- ![](./diagram_bartpost_v2.jpg) -->
 <!-- ![](./bert_excel_v2.jpg) -->
@@ -245,6 +245,7 @@ window.onload = wrap_img;
 <hr>
 <ol>
 <li id="fn-2"><p>the same parameter that is used to make model predictions invariant to pad tokens.<a href="#fnref-2" class="footnote">↩</a></p></li>
+<li id="fn-3"><p>"Fully-Visible" and "bidirectional" are used interchangeably. Same with "causal" and "autoregressive".<a href="#fnref-3" class="footnote">↩</a></p></li>
 </ol>
 </div>
 
@@ -254,16 +255,10 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>GPT2, meanwhile, is pretrained to predict the next word using a causal mask: and is more effective for generation tasks, but less effective on downstream tasks where the whole input yields information for the output.</p>
+<p>GPT2, meanwhile, is pretrained to predict the next word using a causal mask, and is more effective for generation tasks, but less effective on downstream tasks where the whole input yields information for the output.</p>
 <p>Here is the <code>attention_mask</code> for GPT2:</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
 <p><img src="/blog_v2/images/copied_from_nb/./diagram_bartpost_gpt2.jpg" alt=""></p>
+<p>The prediction for "eating", only utilizes previous words: "<code>&lt;BOS&gt;</code> I love".</p>
 
 </div>
 </div>
@@ -274,10 +269,10 @@ window.onload = wrap_img;
 <h4 id="Encoder-Decoder">
 <a class="anchor" href="#Encoder-Decoder" aria-hidden="true"><span class="octicon octicon-link"></span></a>Encoder-Decoder<a class="anchor-link" href="#Encoder-Decoder"> </a>
 </h4>
-<p>Our new friends, like Bart, get the best of both worlds:</p>
-<p>The encoder's <code>attention_mask</code> is bidirectional, like BERT:
+<p>Our new friends, like BART, get the best of both worlds.</p>
+<p>The encoder's <code>attention_mask</code> is fully visible, like BERT:
 <img src="/blog_v2/images/copied_from_nb/./seq2seq_enc_v5.png" alt=""></p>
-<p>and the decoder's <code>attention_mask</code> is causal, like GPT2:</p>
+<p>The decoder's <code>attention_mask</code> is causal, like GPT2:</p>
 <p><img src="/blog_v2/images/copied_from_nb/./seq2seq_dec.png" alt=""></p>
 <!-- ![](./causal_with_prefix.jpg) -->
 
@@ -305,10 +300,16 @@ window.onload = wrap_img;
 <h4 id="Pretraining:-Fill-In-the-Span">
 <a class="anchor" href="#Pretraining:-Fill-In-the-Span" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pretraining: Fill In the Span<a class="anchor-link" href="#Pretraining:-Fill-In-the-Span"> </a>
 </h4>
-<p>Bart and T5 are both pretrained on tasks where <strong>spans</strong> of text are replaced by masked tokens. The model must learn to reconstruct the original document. Figure 1 from the BART paper explains it well:</p>
+<p>Bart and T5 are both pretrained<sup class="footnote-ref" id="fnref-5"><a href="#fn-5">1</a></sup> on tasks where <strong>spans</strong> of text are replaced by masked tokens. The model must learn to reconstruct the original document. Figure 1 from the BART paper explains it well:</p>
 <p><img src="/blog_v2/images/copied_from_nb/./text_infilling.png" alt="">
 In this example, the original document is A B C D E. the span <code>[C, D]</code> is masked before encoding and an extra mask is inserted before B, leaving the corrupted document <code>'A _ B _ E'</code> as input to the encoder.</p>
 <p>The decoder (autogressive means "uses a causal mask") must reconstruct the original document, using the encoder's output and previous uncorrupted tokens.</p>
+<div class="footnotes">
+<hr>
+<ol>
+<li id="fn-5"><p>This is a bit of a simplification. Both papers experiment with many different pretraining tasks, and find that this one performs well. T5 uses a "replace corrupted spans" task. Instead of putting masks, they put in a random token.<a href="#fnref-5" class="footnote">↩</a></p></li>
+</ol>
+</div>
 
 </div>
 </div>
@@ -326,7 +327,7 @@ In this example, the original document is A B C D E. the span <code>[C, D]</code
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>In summarization tasks, the <code>input</code> sequence is the document we want to summarize, and the <code>output</code> sequence is a ground truth summary.
-The Seq2Seq attention pattern is therefore well suited to summarization and other conditional generation tasks, because Seq2Seq models are allowed to attend to the whole <code>input</code> document, but, as they generate a summary, they can only consider what they've already generated. The numbers confirm this: all the new fancy Seq2Seq models do a lot better than the old less-fancy guys on the CNN/Daily Mail abstractive summarization task, and Bart does especially well.</p>
+Seq2Seq archictectures can be directly finetuned on summarization tasks, without any new randomly initialized heads. The pretraining task is also a good match for the downstream task. In both settings, the input document must be copied from the input with modification. The numbers confirm this: all the new fancy Seq2Seq models do a lot better than the old less-fancy guys on the CNN/Daily Mail abstractive summarization task, and BART does especially well.</p>
 
 </div>
 </div>
@@ -337,15 +338,15 @@ The Seq2Seq attention pattern is therefore well suited to summarization and othe
 <table>
 <thead>
 <tr>
-<th style="text-align:left"></th>
-<th style="text-align:right">rouge2</th>
-<th style="text-align:left">model_size</th>
+<th style="text-align:left">Model</th>
+<th style="text-align:right">Rouge2</th>
+<th style="text-align:left">Model Size</th>
 <th style="text-align:left">Pretraining</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left">PT-Gen (not seq2seq)</td>
+<td style="text-align:left">PT-Gen</td>
 <td style="text-align:right">17.28</td>
 <td style="text-align:left">22 M</td>
 <td style="text-align:left">None</td>
@@ -411,17 +412,9 @@ The Seq2Seq attention pattern is therefore well suited to summarization and othe
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="BartForConditionalGeneration-Demo">
-<a class="anchor" href="#BartForConditionalGeneration-Demo" aria-hidden="true"><span class="octicon octicon-link"></span></a>BartForConditionalGeneration Demo<a class="anchor-link" href="#BartForConditionalGeneration-Demo"> </a>
+<h3 id="Demo:-BartForConditionalGeneration">
+<a class="anchor" href="#Demo:-BartForConditionalGeneration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Demo: BartForConditionalGeneration<a class="anchor-link" href="#Demo:-BartForConditionalGeneration"> </a>
 </h3>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>imports</strong></p>
-
 </div>
 </div>
 </div>
@@ -586,7 +579,7 @@ The Seq2Seq attention pattern is therefore well suited to summarization and othe
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>GPT2 (which in fairness is not finetuned for summarization) cannot really continue the tennis article sensically.</p>
+<p>GPT2, which in fairness is not finetuned for summarization, cannot really continue the tennis article sensically.</p>
 
 </div>
 </div>
