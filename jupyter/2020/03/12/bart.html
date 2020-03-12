@@ -7,16 +7,16 @@
 <meta name="generator" content="Jekyll v4.0.0" />
 <meta property="og:title" content="Introducing BART" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers" />
-<meta property="og:description" content="Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers" />
+<meta name="description" content="Episode 1 – a mysterious new Seq2Seq model with state of the art summarization performance visits a popular open source library" />
+<meta property="og:description" content="Episode 1 – a mysterious new Seq2Seq model with state of the art summarization performance visits a popular open source library" />
 <link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html" />
 <meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html" />
 <meta property="og:site_name" content="TensorGoose" />
-<meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/chart-preview.png" />
+<meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/text_infilling.png" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2020-03-12T00:00:00-05:00" />
 <script type="application/ld+json">
-{"datePublished":"2020-03-12T00:00:00-05:00","headline":"Introducing BART","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html","dateModified":"2020-03-12T00:00:00-05:00","@context":"https://schema.org"}</script>
+{"datePublished":"2020-03-12T00:00:00-05:00","headline":"Introducing BART","image":"https://sshleifer.github.io/blog_v2/images/text_infilling.png","description":"Episode 1 – a mysterious new Seq2Seq model with state of the art summarization performance visits a popular open source library","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html","dateModified":"2020-03-12T00:00:00-05:00","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/blog_v2/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://sshleifer.github.io/blog_v2/feed.xml" title="TensorGoose" /><script async src="https://www.googletagmanager.com/gtag/js?id=UA-160410879-1"></script>
 <script>
@@ -32,16 +32,16 @@
 <meta name="generator" content="Jekyll v4.0.0" />
 <meta property="og:title" content="Introducing BART" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers" />
-<meta property="og:description" content="Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers" />
+<meta name="description" content="Episode 1 – a mysterious new Seq2Seq model with state of the art summarization performance visits a popular open source library" />
+<meta property="og:description" content="Episode 1 – a mysterious new Seq2Seq model with state of the art summarization performance visits a popular open source library" />
 <link rel="canonical" href="https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html" />
 <meta property="og:url" content="https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html" />
 <meta property="og:site_name" content="TensorGoose" />
-<meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/chart-preview.png" />
+<meta property="og:image" content="https://sshleifer.github.io/blog_v2/images/text_infilling.png" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2020-03-12T00:00:00-05:00" />
 <script type="application/ld+json">
-{"datePublished":"2020-03-12T00:00:00-05:00","headline":"Introducing BART","image":"https://sshleifer.github.io/blog_v2/images/chart-preview.png","description":"Episode 1 – a strange new Seq2Seq model with state of the art summarization performance comes to transfomers","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html","dateModified":"2020-03-12T00:00:00-05:00","@context":"https://schema.org"}</script>
+{"datePublished":"2020-03-12T00:00:00-05:00","headline":"Introducing BART","image":"https://sshleifer.github.io/blog_v2/images/text_infilling.png","description":"Episode 1 – a mysterious new Seq2Seq model with state of the art summarization performance visits a popular open source library","mainEntityOfPage":{"@type":"WebPage","@id":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html"},"@type":"BlogPosting","url":"https://sshleifer.github.io/blog_v2/jupyter/2020/03/12/bart.html","dateModified":"2020-03-12T00:00:00-05:00","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 <link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
@@ -124,7 +124,7 @@ window.onload = wrap_img;
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">Introducing BART</h1><p class="page-description">Episode 1 -- a strange new Seq2Seq model with state of the art summarization performance comes to transfomers</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-03-12T00:00:00-05:00" itemprop="datePublished">
+    <h1 class="post-title p-name" itemprop="name headline">Introducing BART</h1><p class="page-description">Episode 1 -- a mysterious new Seq2Seq model with state of the art summarization performance visits a popular open source library</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-03-12T00:00:00-05:00" itemprop="datePublished">
         Mar 12, 2020
       </time>
        • <span class="read-time" title="Estimated read time">
@@ -205,7 +205,7 @@ window.onload = wrap_img;
 <h3 id="Background:-Seq2Seq-Pretraining">
 <a class="anchor" href="#Background:-Seq2Seq-Pretraining" aria-hidden="true"><span class="octicon octicon-link"></span></a>Background: Seq2Seq Pretraining<a class="anchor-link" href="#Background:-Seq2Seq-Pretraining"> </a>
 </h3>
-<p>In October 2019, teams from Google and Facebook published new transformer papers:  <a href="https://arxiv.org/abs/1910.10683">T5</a> and <a href="https://arxiv.org/abs/1910.13461">BART</a>. Both papers achieved better downstream performance on generation tasks, like translation and summarization, with two changes:</p>
+<p>In October 2019, teams from Google and Facebook published new transformer papers:  <a href="https://arxiv.org/abs/1910.10683">T5</a> and <a href="https://arxiv.org/abs/1910.13461">BART</a>. Both papers achieved better downstream performance on generation tasks, like abstractive summarization and dialogue, with two changes:</p>
 <ul>
 <li>replace BERT's bidirectional encoder architecture with an encoder-decoder architecture</li>
 <li>replace BERT's fill-in-the blank cloze task with a more complicated mix of pretraining tasks.</li>
@@ -228,12 +228,12 @@ window.onload = wrap_img;
 <h4 id="Bert-vs.-GPT2">
 <a class="anchor" href="#Bert-vs.-GPT2" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bert vs. GPT2<a class="anchor-link" href="#Bert-vs.-GPT2"> </a>
 </h4>
-<p>As the BART authors write:</p>
+<p>As the BART authors write,</p>
 <blockquote>
 <p>(BART) can be seen as generalizing Bert (due to the bidirectional encoder) and GPT2 (with the left to right decoder).</p>
 </blockquote>
-<p>Bert is pretrained to try to predict masked tokens, and uses the whole sequence to get enough info to make a good guess. This is good for tasks where the prediction at position <code>i</code> is allowed to utilize information from positions after <code>i</code>, but less useful for tasks, like text generation, where te prediction for position <code>i</code> can only depend on previously generated words.</p>
-<p>In code, the idea of "what information you can use when predicting the token at position <code>i</code>" is controlled by an argument called <code>attention_mask</code><sup class="footnote-ref" id="fnref-2"><a href="#fn-2">1</a></sup>. A value of 1 in these examples means that the model can use information for the column's when predicting the row's word.</p>
+<p>Bert is pretrained to try to predict masked tokens, and uses the whole sequence to get enough info to make a good guess. This is good for tasks where the prediction at position <code>i</code> is allowed to utilize information from positions after <code>i</code>, but less useful for tasks, like text generation, where the prediction for position <code>i</code> can only depend on previously generated words.</p>
+<p>In code, the idea of "what information can be used use when predicting the token at position <code>i</code>" is controlled by an argument called <code>attention_mask</code><sup class="footnote-ref" id="fnref-2"><a href="#fn-2">1</a></sup>. A value of 1 in the attention mask means that the model can use information for the column's word when predicting the row's word.</p>
 <!-- > Note: In this post, we show attention masks in grids where each row `y` represents an output token, and each column `x` represents an input token. If the square at `(y3, x4)` is black. It means that our prediction for `y3` is allowed to utilize information from `x4`. During pretraining, `x` would be the corrupted document, and `y` would be the original. -->
 
 <p>Here is Bert's "Fully-visible" <code>attention_mask</code>:</p>
