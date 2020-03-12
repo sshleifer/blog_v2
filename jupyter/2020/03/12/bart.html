@@ -207,7 +207,7 @@ window.onload = wrap_img;
 </h3>
 <p>In October 2019, teams from Google and Facebook published new transformer papers:  <a href="https://arxiv.org/abs/1910.10683">T5</a> and <a href="https://arxiv.org/abs/1910.13461">BART</a>. Both papers achieved better downstream performance on generation tasks, like abstractive summarization and dialogue, with two changes:</p>
 <ul>
-<li>add a BERT's bidirectional encoder architecture with an encoder-decoder architecture</li>
+<li>add a causal decoder to BERT's bidirectional encoder architecture</li>
 <li>replace BERT's fill-in-the blank cloze task with a more complicated mix of pretraining tasks.</li>
 </ul>
 <!-- **Tasks:** Historically, Seq2Seq models have been used for text generation tasks like summarization and translation. "BART is particularly effective when finetuned for text generation, but also matches the performance of RoBERTa on GLUE and SQuAD", with only 10% more parameters. -->
@@ -649,7 +649,7 @@ Seq2Seq archictectures can be directly finetuned on summarization tasks, without
 <a class="anchor" href="#Conclusion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusion<a class="anchor-link" href="#Conclusion"> </a>
 </h2>
 <p>Our first release of <code>BartModel</code> prioritized moving quickly and keeping the code simple, but it's still a work in progress. I am currently working on making the implementation in transformers faster and more memory efficient, so stay tuned for episode 2!</p>
-<p>A big thank you to Sasha Rush, Patrick Von Platten, Thomas Wolf, Clement Delangue, Victor Sanh, Yacine Jernite, Harrison Chase and Colin Raffel for their feedback on earlier versions of this post, and to the BART authors for releasing their code and answering questions on GitHub.</p>
+<p>A big thank you to Sasha Rush, Patrick von Platen, Thomas Wolf, Clement Delangue, Victor Sanh, Yacine Jernite, Harrison Chase and Colin Raffel for their feedback on earlier versions of this post, and to the BART authors for releasing their code and answering questions on GitHub.</p>
 
 </div>
 </div>
